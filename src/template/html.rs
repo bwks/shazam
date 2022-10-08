@@ -8,13 +8,27 @@ pub const BASE: &str = r#"<!DOCTYPE html>
     <link rel="stylesheet" href="./style.css">
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
     <script src="index.js"></script>
-    <title>My Website</title>
+    <title>{{ project }}</title>
 
   </head>
   <body>
     <main>
-      <h1>Welcome to My {{ project }}</h1>
+      <h1>{{ project }} site</h1>
+      {% block content %}
+      {% endblock content %}
     </main>
   </body>
+  {% include "includes/_footer.jinja" %}
 </html>
+"#;
+
+pub const BLOG: &str = r#"{% extends "layouts/base.jinja" %}
+{% block content %}
+  <p>Blog Template</p>
+{% endblock content %}
+"#;
+
+pub const FOOTER: &str = r#"<footer>
+  <p>FOOTER</p>
+</footer>
 "#;
