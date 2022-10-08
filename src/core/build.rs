@@ -1,7 +1,5 @@
 use minijinja::{context, Environment, Source};
-use serde::de::IntoDeserializer;
 use serde::{Deserialize, Serialize};
-use std::ffi::OsString;
 use std::fs;
 use std::io::prelude::*;
 
@@ -167,10 +165,6 @@ pub fn init(name: String) -> Config {
             }
         }
     }
-
-    // println!("{:#?}", all_templates);
-
-    // Load includes
 
     // Build base site
     // Base template

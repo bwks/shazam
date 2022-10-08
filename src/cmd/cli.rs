@@ -1,14 +1,50 @@
-use clap::Parser;
+use crate::core::build;
+use crate::http;
+
+use clap::{Args, Parser, Subcommand};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 pub struct Cli {
-    /// Name of project
-    #[arg(short, long, value_name = "name")]
-    pub init: String,
+    #[clap(subcommand)]
+    pub command: Commands,
 }
 
-pub fn cli() -> Cli {
+#[derive(Debug, Subcommand)]
+pub enum Commands {
+    /// Initialize a project
+    Init(InitCommand),
+
+    /// Start the development web server
+    Serve(ServeCommand),
+}
+
+#[derive(Args, Debug)]
+pub struct InitCommand {
+    /// Name of the project
+    pub name: String,
+}
+
+#[derive(Args, Debug)]
+pub struct ServeCommand {
+    /// IPv4 Address of the development server
+    #[clap(short, long, default_value_t = String::from("0.0.0.0"))]
+    pub ipv4_address: String,
+
+    /// Port of the development server
+    #[clap(short, long, default_value_t = 3000)]
+    pub port: u16,
+}
+
+pub async fn cli() {
     let cli = Cli::parse();
-    return cli;
+    match &cli.command {
+        Commands::Init(init_command) => {
+            build::init(init_command.name.to_owned());
+        }
+        Commands::Serve(serve_command) => {
+            // Load config file
+            http::server::serve(serve_command.ipv4_address.to_owned(), serve_command.port).await;
+        }
+    }
 }
