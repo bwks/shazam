@@ -74,6 +74,9 @@ fn make_file(path: String, content: String) {
     fs::write(path, content).unwrap()
 }
 
+// Rebuild site
+// pub fn rebuild() {}
+
 pub fn init(name: String) -> Config {
     println!("Project `{}` initialzing...", name);
     let mut config = Config::default();
@@ -116,6 +119,10 @@ pub fn init(name: String) -> Config {
         make_dirs(dir.0, dir.1)
     }
 
+    let mut blog_post = Post::default();
+    blog_post.title = "Test Blog".to_owned();
+    blog_post.published_date = "2022/10/09".to_owned();
+
     // Files
     let files = vec![
         (
@@ -124,9 +131,9 @@ pub fn init(name: String) -> Config {
             serde_json::to_string_pretty(&config).unwrap(),
         ),
         (
-            // Data file
-            format!("{}/{}/data.json", config.project, config.data_dir),
-            serde_json::to_string_pretty(&vec![Post::default()]).unwrap(),
+            // Blog Data file
+            format!("{}/{}/blogs.json", config.project, config.data_dir),
+            serde_json::to_string_pretty(&vec![blog_post]).unwrap(),
         ),
         (
             // Tailwind config file
@@ -216,8 +223,14 @@ pub fn init(name: String) -> Config {
         format!("{}/{}", config.project, config.output_dir),
         vec!["blog".to_owned()],
     );
+    let blog_file =
+        fs::read_to_string(format!("{}/{}/blogs.json", config.project, config.data_dir)).unwrap();
+    let blog_posts: Vec<Post> = serde_json::from_str(blog_file.as_str()).unwrap();
+
     let tmpl = env.get_template("layouts/blog.jinja").unwrap();
-    let blog_tmpl = tmpl.render(context!(project => config.project)).unwrap();
+    let blog_tmpl = tmpl
+        .render(context!(project => config.project, blog_posts => blog_posts))
+        .unwrap();
 
     let mut blog_file = fs::File::create(format!(
         "{}/{}/blog/index.html",

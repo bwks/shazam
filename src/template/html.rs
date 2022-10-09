@@ -23,7 +23,12 @@ pub const BASE: &str = r#"<!DOCTYPE html>
 
 pub const BLOG: &str = r#"{% extends "layouts/base.jinja" %}
 {% block content %}
-  <p>Blog Template</p>
+  <div class="py-5">
+    <h3 class="text-lg font-black">Blogs</h3>
+    {% for post in blog_posts %}
+      <p>{{ post.title }}</p>
+    {% endfor %}
+  </div>
 {% endblock content %}
 "#;
 
