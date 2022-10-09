@@ -5,6 +5,7 @@ use std::io::prelude::*;
 
 use crate::string_vec;
 use crate::template::html;
+use crate::template::proc;
 use crate::template::tailwind;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -119,7 +120,7 @@ pub fn init(name: String) -> Config {
     let files = vec![
         (
             // Config file
-            "config.json".to_owned(),
+            "./config.json".to_owned(),
             serde_json::to_string_pretty(&config).unwrap(),
         ),
         (
@@ -129,11 +130,8 @@ pub fn init(name: String) -> Config {
         ),
         (
             // Tailwind config file
-            format!(
-                "{}/{}/tailwind.config.js",
-                config.project, config.config_dir
-            ),
-            tailwind::CONFIG.to_owned(),
+            format!("{}/assets/css/input.css", config.project,),
+            tailwind::CSS.to_owned(),
         ),
         (
             // Base layout file
@@ -155,6 +153,37 @@ pub fn init(name: String) -> Config {
         make_file(file.0, file.1)
     }
 
+    // Build base site
+    // Site assets
+    make_dirs(
+        format!("{}/{}", config.project, config.output_dir),
+        config.asset_dirs.to_owned(),
+    );
+
+    // Template environment
+    let mut env = Environment::new();
+    let mut source = Source::new();
+
+    // Tailwind template
+    source
+        .add_template("tailwind.config.js", tailwind::CONFIG)
+        .unwrap();
+    env.set_source(source.to_owned());
+    let tailwind_tmpl = env.get_template("tailwind.config.js").unwrap();
+    let tailwind_config = tailwind_tmpl
+        .render(context!(project => config.project, output_dir => config.output_dir))
+        .unwrap();
+    make_file("./tailwind.config.js".to_owned(), tailwind_config);
+
+    // Procfile
+    source.add_template("Procfile", proc::PROCFILE).unwrap();
+    env.set_source(source.to_owned());
+    let procfile_tmpl = env.get_template("Procfile").unwrap();
+    let procfile_config = procfile_tmpl
+        .render(context!(project => config.project, output_dir => config.output_dir))
+        .unwrap();
+    make_file("./Procfile".to_owned(), procfile_config);
+
     // Load templaes
     let mut all_templates: Vec<String> = vec![];
     for dir in &config.template_dirs {
@@ -165,11 +194,6 @@ pub fn init(name: String) -> Config {
             }
         }
     }
-
-    // Build base site
-    // Base template
-    let mut env = Environment::new();
-    let mut source = Source::new();
 
     for template in all_templates {
         let template_string =
@@ -188,7 +212,6 @@ pub fn init(name: String) -> Config {
     .unwrap();
     index_file.write_all(base_tmpl.as_bytes()).unwrap();
 
-    //
     make_dirs(
         format!("{}/{}", config.project, config.output_dir),
         vec!["blog".to_owned()],

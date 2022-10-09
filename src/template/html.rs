@@ -1,19 +1,18 @@
 pub const BASE: &str = r#"<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="/css/app.css">
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
-    <script src="index.js"></script>
+    <script src="/js/app.js"></script>
     <title>{{ project }}</title>
-
   </head>
-  <body>
+  <body class="h-full antiailiased container mx-auto">
     <main>
-      <h1>{{ project }} site</h1>
+      <h1 class="text-2xl font-black">{{ project }} site</h1>
       {% block content %}
       {% endblock content %}
     </main>

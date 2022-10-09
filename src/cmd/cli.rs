@@ -36,14 +36,13 @@ pub struct ServeCommand {
     pub port: u16,
 }
 
-pub async fn cli() {
+pub async fn init() {
     let cli = Cli::parse();
     match &cli.command {
         Commands::Init(init_command) => {
             build::init(init_command.name.to_owned());
         }
         Commands::Serve(serve_command) => {
-            // Load config file
             http::server::serve(serve_command.ipv4_address.to_owned(), serve_command.port).await;
         }
     }

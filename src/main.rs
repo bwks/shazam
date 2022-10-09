@@ -8,5 +8,5 @@ use crate::cmd::cli;
 
 #[tokio::main]
 async fn main() {
-    cli::cli().await;
+    cli::init().await;
 }
