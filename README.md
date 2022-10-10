@@ -7,7 +7,8 @@ a minimal set of features.
 * ~~Load Config~~
 * ~~Build site~~
 * ~~HTTP server~~
-* ~~ Rebuild on file change~~
+* Rebuild on file change
+* New post generator
 
 # Features
 

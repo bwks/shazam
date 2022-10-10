@@ -24,12 +24,19 @@ pub const BASE: &str = r#"<!DOCTYPE html>
 pub const BLOG: &str = r#"{% extends "layouts/base.jinja" %}
 {% block content %}
   <div class="py-5">
-    <h3 class="text-lg font-black">Blogs</h3>
-    {% for post in blog_posts %}
-      <p>{{ post.title }}</p>
-    {% endfor %}
+    <h3 class="text-lg font-black">{{ title }}</h3>
   </div>
-{% endblock content %}
+  <div class="text-red-500">
+    {% block blog_content %}
+    {% endblock blog_content %}
+  </div>
+  {% endblock content %}
+"#;
+
+pub const BLOG_POST: &str = r#"{% extends "layouts/blog.jinja" %}
+{% block blog_content %}
+  Blog content here
+{% endblock blog_content %}
 "#;
 
 pub const FOOTER: &str = r#"<footer>
