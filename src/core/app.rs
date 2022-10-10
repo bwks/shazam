@@ -1,64 +1,21 @@
 use minijinja::{context, Environment, Source};
-use serde::{Deserialize, Serialize};
 use std::fs;
 use std::io::prelude::*;
 
 use crate::core::konst::{
-    ASSETS_DIR, BLOG_DATA_FILE, BLOG_DIR, CONFIG_DIR, CONFIG_FILE, CSS_DIR, CSS_FRAMEWORK,
-    DATA_DIR, ERROR_DIR, FAVICON_DIR, FONT_DIR, HTML_INDEX_FILE, IMG_DIR, INCLUDES_DIR, JS_DIR,
-    LAYOUTS_DIR, OUTPUT_DIR, PROC_FILE, SYNTAX_HIGHLIGHTER, TAILWIND_CONFIG_FILE,
+    ASSETS_DIR, BLOG_DATA_FILE, BLOG_DIR, CONFIG_DIR, CONFIG_FILE, CSS_DIR, DATA_DIR,
+    HTML_INDEX_FILE, INCLUDES_DIR, LAYOUTS_DIR, OUTPUT_DIR, PROC_FILE, TAILWIND_CONFIG_FILE,
     TAILWIND_INPUT_FILE, TEMPLATES_DIR,
 };
-use crate::string_vec;
+
+use crate::model::config::Config;
+use crate::model::post::Post;
 use crate::template::html;
 use crate::template::proc;
 use crate::template::tailwind;
 use crate::util::file_sys::{make_dirs, make_file};
 use crate::util::template::render_template;
 use crate::util::text::dasherize;
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Config {
-    pub project: String,
-    pub css: String,
-    pub code_block: String,
-    pub config_dir: String,
-    pub data_dir: String,
-    pub output_dir: String,
-    pub asset_dirs: Vec<String>,
-    pub template_dirs: Vec<String>,
-    pub content_dirs: Vec<String>,
-}
-impl Config {
-    pub fn default() -> Self {
-        Self {
-            project: "".to_owned(),
-            css: CSS_FRAMEWORK.to_owned(),
-            code_block: SYNTAX_HIGHLIGHTER.to_owned(),
-            config_dir: CONFIG_DIR.to_owned(),
-            data_dir: DATA_DIR.to_owned(),
-            output_dir: OUTPUT_DIR.to_owned(),
-            asset_dirs: string_vec![CSS_DIR, JS_DIR, FONT_DIR, IMG_DIR, FAVICON_DIR, ERROR_DIR],
-            template_dirs: string_vec![LAYOUTS_DIR, INCLUDES_DIR],
-            content_dirs: string_vec![BLOG_DIR],
-        }
-    }
-}
-
-#[derive(Default, Serialize, Deserialize)]
-pub struct Post {
-    pub published_date: String,
-    pub updated_date: String,
-    pub title: String,
-    pub description: String,
-    pub category: String,
-    pub published: bool,
-    pub tags: Vec<String>,
-    pub references: Vec<String>,
-    pub bibliography: Vec<String>,
-    pub toc_items: Vec<String>,
-    pub links: Vec<String>,
-}
 
 // Initial Build of site
 pub fn init(project_name: String) -> Config {

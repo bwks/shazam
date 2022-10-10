@@ -1,6 +1,8 @@
 use std::fs;
 
 use crate::http;
+use crate::model::config::Config;
+use crate::model::post::Post;
 use crate::template::html;
 use crate::util::text::dasherize;
 use crate::{core::app, util::file_sys::make_file};
@@ -69,7 +71,7 @@ pub async fn init() {
         Commands::Build => app::build(),
         Commands::Generate(generate_command) => {
             let config_file = fs::read_to_string("config.json").unwrap();
-            let config: app::Config = serde_json::from_str(config_file.as_str()).unwrap();
+            let config: Config = serde_json::from_str(config_file.as_str()).unwrap();
 
             println!("{}", generate_command.title);
             println!("{}", generate_command.content);
@@ -84,9 +86,8 @@ pub async fn init() {
                     config.project, config.data_dir, generate_command.content
                 ))
                 .unwrap();
-                let mut content: Vec<app::Post> =
-                    serde_json::from_str(content_file.as_str()).unwrap();
-                let mut post = app::Post::default();
+                let mut content: Vec<Post> = serde_json::from_str(content_file.as_str()).unwrap();
+                let mut post = Post::default();
                 post.title = generate_command.title.to_owned();
                 content.push(post);
 

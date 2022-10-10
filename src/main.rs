@@ -1,6 +1,7 @@
 mod cmd;
 mod core;
 mod http;
+mod model;
 mod template;
 mod util;
 

@@ -3,7 +3,7 @@ use std::{fs, io, net::SocketAddr};
 use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::core::app::Config;
+use crate::model::config::Config;
 
 pub async fn serve(ipv4_address: String, port: u16) {
     let config_file = fs::read_to_string("config.json").unwrap();
