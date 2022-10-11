@@ -1,4 +1,4 @@
-use minijinja::{context, Environment, Source};
+use minijinja::{context, Source};
 use std::fs;
 use std::io::prelude::*;
 
@@ -16,7 +16,7 @@ use crate::template::html;
 use crate::template::proc;
 use crate::template::tailwind;
 use crate::util::file_sys::{make_dirs, make_file};
-use crate::util::template::{load_templates, render_template};
+use crate::util::template::{init_env, load_templates, render_template};
 use crate::util::text::dasherize;
 
 /// Initial site directories and files
@@ -29,7 +29,7 @@ pub fn init(project_name: String) -> Result<Config> {
     let content_dirs = config.content_dirs.to_owned();
 
     // Template environment
-    let mut env = Environment::new();
+    let mut env = init_env();
     let mut source = Source::new();
 
     // Build project
@@ -50,7 +50,7 @@ pub fn init(project_name: String) -> Result<Config> {
     make_dirs(&format!("{project_name}/{OUTPUT_DIR}"), asset_dirs)?;
 
     let mut blog_post = Post::default();
-    blog_post.title = "Test Blog".to_owned();
+    blog_post.title = "test blog".to_owned();
     blog_post.published_date = "2022/10/09".to_owned();
 
     // Files
@@ -133,7 +133,7 @@ pub fn init(project_name: String) -> Result<Config> {
     let blog_tmpl = render_template(
         &env,
         &format!("{LAYOUTS_DIR}/blog.jinja"),
-        context!(project => project_name, blog_posts => blog_posts),
+        context!(project => project_name, posts => blog_posts),
     )?;
     make_file(
         &format!("{project_name}/{OUTPUT_DIR}/{BLOG_DIR}/{HTML_INDEX_FILE}"),
@@ -156,7 +156,7 @@ pub fn build() -> Result<()> {
     println!("Project: `{project_name}` => building ...");
 
     // Template environment
-    let mut env = Environment::new();
+    let mut env = init_env();
     let mut source = Source::new();
 
     let blog_file = fs::read_to_string(format!("{project_name}/{data_dir}/{BLOG_DATA_FILE}"))?;
@@ -164,6 +164,7 @@ pub fn build() -> Result<()> {
 
     load_templates(&mut env, &mut source, &config)?;
 
+    // TODO: iterate all data files.
     for post in blog_posts {
         let post_title = dasherize(post.title.to_owned());
         let file_name = format!("{post_title}.jinja");

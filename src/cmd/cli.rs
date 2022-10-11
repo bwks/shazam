@@ -69,7 +69,7 @@ pub async fn init() -> Result<()> {
             Ok(())
         }
         Commands::Serve(serve_command) => {
-            http::server::serve(serve_command.ipv4_address.to_owned(), serve_command.port).await;
+            http::server::serve(serve_command.ipv4_address.to_owned(), serve_command.port).await?;
             Ok(())
         }
         Commands::Build => {

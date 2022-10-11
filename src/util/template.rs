@@ -6,7 +6,17 @@ use minijinja::{Environment, Source};
 
 use crate::core::konst::TEMPLATES_DIR;
 use crate::model::config::Config;
+use crate::util::text;
 
+/// Initialize template environment
+pub fn init_env() -> Environment<'static> {
+    let mut env = Environment::new();
+    env.add_filter("dasherize", text::dasherize);
+    env.add_filter("titlecase", text::title);
+    env
+}
+
+/// Render a template
 pub fn render_template(env: &Environment, template: &str, kontext: Value) -> Result<String> {
     let tmpl = env.get_template(template)?;
     let r = tmpl.render(kontext)?;
