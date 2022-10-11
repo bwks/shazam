@@ -2,15 +2,19 @@ use std::fs;
 use std::io;
 use std::path::Path;
 
-pub fn make_dirs(parent_path: &String, directories: Vec<String>) {
+use anyhow::Result;
+
+pub fn make_dirs(parent_path: &String, directories: Vec<String>) -> Result<()> {
     for d in directories {
-        fs::create_dir_all(format!("{}/{}", parent_path, d)).unwrap();
-        fs::File::create(format!("{}/{}/.gitkeep", parent_path, d)).unwrap();
+        fs::create_dir_all(format!("{}/{}", parent_path, d))?;
+        fs::File::create(format!("{}/{}/.gitkeep", parent_path, d))?;
     }
+    Ok(())
 }
 
-pub fn make_file(path: &String, content: &String) {
-    fs::write(path, content).unwrap()
+pub fn make_file(path: &String, content: &String) -> Result<()> {
+    fs::write(path, content)?;
+    Ok(())
 }
 
 /// Copy files from source to destination recursively.

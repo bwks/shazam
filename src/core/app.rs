@@ -2,6 +2,8 @@ use minijinja::{context, Environment, Source};
 use std::fs;
 use std::io::prelude::*;
 
+use anyhow::Result;
+
 use crate::core::konst::{
     ASSETS_DIR, BLOG_DATA_FILE, BLOG_DIR, CONFIG_DIR, CONFIG_FILE, CSS_DIR, DATA_DIR,
     HTML_INDEX_FILE, INCLUDES_DIR, LAYOUTS_DIR, OUTPUT_DIR, PROC_FILE, TAILWIND_CONFIG_FILE,
@@ -17,8 +19,8 @@ use crate::util::file_sys::{make_dirs, make_file};
 use crate::util::template::render_template;
 use crate::util::text::dasherize;
 
-// Initial Build of site
-pub fn init(project_name: String) -> Config {
+/// Initial site directories and files
+pub fn init(project_name: String) -> Result<Config> {
     println!("Project `{}` initialzing ...", project_name);
     let mut config = Config::default();
     config.project = project_name.to_owned();
@@ -32,20 +34,20 @@ pub fn init(project_name: String) -> Config {
 
     // Build project
     // Directories
-    make_dirs(&project_name, vec![CONFIG_DIR.to_owned()]);
-    make_dirs(&project_name, vec![DATA_DIR.to_owned()]);
-    make_dirs(&project_name, vec![OUTPUT_DIR.to_owned()]);
+    make_dirs(&project_name, vec![CONFIG_DIR.to_owned()])?;
+    make_dirs(&project_name, vec![DATA_DIR.to_owned()])?;
+    make_dirs(&project_name, vec![OUTPUT_DIR.to_owned()])?;
     make_dirs(
         &format!("{project_name}/{ASSETS_DIR}"),
         asset_dirs.to_owned(),
-    );
+    )?;
     make_dirs(
         &format!("{project_name}/{TEMPLATES_DIR}"),
         template_dirs.to_owned(),
-    );
-    make_dirs(&project_name, content_dirs.to_owned());
-    make_dirs(&format!("{project_name}/{OUTPUT_DIR}"), content_dirs);
-    make_dirs(&format!("{project_name}/{OUTPUT_DIR}"), asset_dirs);
+    )?;
+    make_dirs(&project_name, content_dirs.to_owned())?;
+    make_dirs(&format!("{project_name}/{OUTPUT_DIR}"), content_dirs)?;
+    make_dirs(&format!("{project_name}/{OUTPUT_DIR}"), asset_dirs)?;
 
     let mut blog_post = Post::default();
     blog_post.title = "Test Blog".to_owned();
@@ -54,61 +56,59 @@ pub fn init(project_name: String) -> Config {
     // Files
     make_file(
         &CONFIG_FILE.to_owned(),
-        &serde_json::to_string_pretty(&config).unwrap(),
-    );
+        &serde_json::to_string_pretty(&config)?,
+    )?;
     make_file(
         &format!("{project_name}/{DATA_DIR}/{BLOG_DATA_FILE}"),
-        &serde_json::to_string_pretty(&vec![blog_post]).unwrap(),
-    );
+        &serde_json::to_string_pretty(&vec![blog_post])?,
+    )?;
     make_file(
         &format!("{project_name}/{ASSETS_DIR}/{CSS_DIR}/{TAILWIND_INPUT_FILE}"),
         &tailwind::CSS.to_owned(),
-    );
+    )?;
     make_file(
         &format!("{project_name}/{TEMPLATES_DIR}/{LAYOUTS_DIR}/base.jinja"),
         &html::BASE.to_owned(),
-    );
+    )?;
     make_file(
         &format!("{project_name}/{TEMPLATES_DIR}/{LAYOUTS_DIR}/blog.jinja"),
         &html::BLOG.to_owned(),
-    );
+    )?;
     make_file(
         &format!("{project_name}/{BLOG_DIR}/test-blog.jinja"),
         &html::BLOG_POST.to_owned(),
-    );
+    )?;
     make_file(
         &format!("{project_name}/{TEMPLATES_DIR}/{INCLUDES_DIR}/footer.jinja"),
         &html::FOOTER.to_owned(),
-    );
+    )?;
 
     // Tailwind config file
-    source
-        .add_template(TAILWIND_CONFIG_FILE, tailwind::CONFIG)
-        .unwrap();
+    source.add_template(TAILWIND_CONFIG_FILE, tailwind::CONFIG)?;
     env.set_source(source.to_owned());
     let tailwind_tmpl = render_template(
         &env,
         TAILWIND_CONFIG_FILE,
         context!(project => project_name, output_dir => OUTPUT_DIR),
-    );
-    make_file(&TAILWIND_CONFIG_FILE.to_owned(), &tailwind_tmpl);
+    )?;
+    make_file(&TAILWIND_CONFIG_FILE.to_owned(), &tailwind_tmpl)?;
 
     // Procfile
-    source.add_template(PROC_FILE, proc::PROCFILE).unwrap();
+    source.add_template(PROC_FILE, proc::PROCFILE)?;
     env.set_source(source.to_owned());
     let procfile_tmpl = render_template(
         &env,
         PROC_FILE,
         context!(project => project_name, output_dir => OUTPUT_DIR),
-    );
-    make_file(&PROC_FILE.to_owned(), &procfile_tmpl);
+    )?;
+    make_file(&PROC_FILE.to_owned(), &procfile_tmpl)?;
 
     // Load all project templaes into environment
     // frome layouts and includes directories
     let mut all_templates: Vec<String> = vec![];
     for dir in &template_dirs {
-        for entry in fs::read_dir(format!("{project_name}/{TEMPLATES_DIR}/{dir}/")).unwrap() {
-            let file = entry.unwrap().file_name().into_string().unwrap();
+        for entry in fs::read_dir(format!("{project_name}/{TEMPLATES_DIR}/{dir}/"))? {
+            let file = entry?.file_name().into_string().unwrap();
             if file.ends_with(".jinja") || file.ends_with(".j2") {
                 all_templates.push(format!("{dir}/{file}"))
             }
@@ -116,8 +116,8 @@ pub fn init(project_name: String) -> Config {
     }
     for template in all_templates {
         let template_string =
-            fs::read_to_string(format!("{project_name}/{TEMPLATES_DIR}/{template}")).unwrap();
-        source.add_template(template, template_string).unwrap();
+            fs::read_to_string(format!("{project_name}/{TEMPLATES_DIR}/{template}"))?;
+        source.add_template(template, template_string)?;
         env.set_source(source.to_owned());
     }
 
@@ -126,37 +126,37 @@ pub fn init(project_name: String) -> Config {
         &env,
         &format!("{LAYOUTS_DIR}/base.jinja"),
         context!(project => project_name),
-    );
+    )?;
     make_file(
         &format!("{project_name}/{OUTPUT_DIR}/{HTML_INDEX_FILE}"),
         &base_tmpl,
-    );
+    )?;
 
     // Blog index file
-    let blog_file =
-        fs::read_to_string(format!("{project_name}/{DATA_DIR}/{BLOG_DATA_FILE}")).unwrap();
-    let blog_posts: Vec<Post> = serde_json::from_str(blog_file.as_str()).unwrap();
+    let blog_file = fs::read_to_string(format!("{project_name}/{DATA_DIR}/{BLOG_DATA_FILE}"))?;
+    let blog_posts: Vec<Post> = serde_json::from_str(blog_file.as_str())?;
 
     let blog_tmpl = render_template(
         &env,
         &format!("{LAYOUTS_DIR}/blog.jinja"),
         context!(project => project_name, blog_posts => blog_posts),
-    );
+    )?;
     make_file(
         &format!("{project_name}/{OUTPUT_DIR}/{BLOG_DIR}/{HTML_INDEX_FILE}"),
         &blog_tmpl,
-    );
+    )?;
 
-    build();
-    return config;
+    build()?;
+    return Ok(config);
 }
 
-// Rebuild site
-pub fn build() {
-    let config_file = fs::read_to_string(CONFIG_FILE).unwrap();
-    let config: Config = serde_json::from_str(config_file.as_str()).unwrap();
+/// Build site
+pub fn build() -> Result<()> {
+    let config_file = fs::read_to_string(CONFIG_FILE)?;
+    let config: Config = serde_json::from_str(config_file.as_str())?;
     let project_name = config.project;
     let output_dir = config.output_dir;
+    let data_dir = config.data_dir;
 
     println!("Project `{project_name}` building ...");
 
@@ -164,27 +164,22 @@ pub fn build() {
     let mut env = Environment::new();
     let mut source = Source::new();
 
-    let blog_file = fs::read_to_string(format!(
-        "{}/{}/{}",
-        project_name, config.data_dir, BLOG_DATA_FILE
-    ))
-    .unwrap();
-    let blog_posts: Vec<Post> = serde_json::from_str(blog_file.as_str()).unwrap();
+    let blog_file = fs::read_to_string(format!("{project_name}/{data_dir}/{BLOG_DATA_FILE}"))?;
+    let blog_posts: Vec<Post> = serde_json::from_str(blog_file.as_str())?;
 
     // Load templaes
     let mut all_templates: Vec<String> = vec![];
     for dir in &config.template_dirs {
-        for entry in fs::read_dir(format!("{}/templates/{}/", project_name, dir)).unwrap() {
-            let file = entry.unwrap().file_name().into_string().unwrap();
+        for entry in fs::read_dir(format!("{}/templates/{}/", project_name, dir))? {
+            let file = entry?.file_name().into_string().unwrap();
             if file.ends_with(".jinja") || file.ends_with(".j2") {
                 all_templates.push(format!("{dir}/{file}"))
             }
         }
     }
     for template in all_templates {
-        let template_string =
-            fs::read_to_string(format!("{project_name}/templates/{template}")).unwrap();
-        source.add_template(template, template_string).unwrap();
+        let template_string = fs::read_to_string(format!("{project_name}/templates/{template}"))?;
+        source.add_template(template, template_string)?;
         env.set_source(source.to_owned());
     }
 
@@ -194,24 +189,17 @@ pub fn build() {
         make_dirs(
             &format!("{project_name}/{output_dir}/blog"),
             vec![post_title.to_owned()],
-        );
-        let template_string =
-            fs::read_to_string(format!("{project_name}/blog/{file_name}")).unwrap();
-        source
-            .add_template(format!("blog/{file_name}"), template_string)
-            .unwrap();
+        )?;
+        let template_string = fs::read_to_string(format!("{project_name}/blog/{file_name}"))?;
+        source.add_template(format!("blog/{file_name}"), template_string)?;
         env.set_source(source.to_owned());
 
-        let tmpl = env
-            .get_template(format!("blog/{file_name}").as_str())
-            .unwrap();
-        let blog_tmpl = tmpl
-            .render(context!(project => project_name, post => post))
-            .unwrap();
+        let tmpl = env.get_template(format!("blog/{file_name}").as_str())?;
+        let blog_tmpl = tmpl.render(context!(project => project_name, post => post))?;
         let mut blog_file = fs::File::create(format!(
             "{project_name}/{output_dir}/blog/{post_title}/{HTML_INDEX_FILE}",
-        ))
-        .unwrap();
-        blog_file.write_all(blog_tmpl.as_bytes()).unwrap();
+        ))?;
+        blog_file.write_all(blog_tmpl.as_bytes())?;
     }
+    Ok(())
 }

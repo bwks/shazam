@@ -1,5 +1,7 @@
 use std::fs;
 
+use anyhow::Result;
+
 use crate::http;
 use crate::model::config::Config;
 use crate::model::post::Post;
@@ -59,19 +61,24 @@ pub struct GenerateCmd {
     pub content: String,
 }
 
-pub async fn init() {
+pub async fn init() -> Result<()> {
     let cli = Cli::parse();
     match &cli.command {
         Commands::Init(init_command) => {
-            app::init(init_command.name.to_owned());
+            app::init(init_command.name.to_owned())?;
+            Ok(())
         }
         Commands::Serve(serve_command) => {
             http::server::serve(serve_command.ipv4_address.to_owned(), serve_command.port).await;
+            Ok(())
         }
-        Commands::Build => app::build(),
+        Commands::Build => {
+            app::build()?;
+            Ok(())
+        }
         Commands::Generate(generate_command) => {
-            let config_file = fs::read_to_string("config.json").unwrap();
-            let config: Config = serde_json::from_str(config_file.as_str()).unwrap();
+            let config_file = fs::read_to_string("config.json")?;
+            let config: Config = serde_json::from_str(config_file.as_str())?;
             let project_name = config.project.to_owned();
             let data_dir = config.data_dir.to_ascii_lowercase();
             let post_title = dasherize(generate_command.title.to_owned());
@@ -84,24 +91,25 @@ pub async fn init() {
             {
                 // Update content{
                 let content_file =
-                    fs::read_to_string(format!("{project_name}/{data_dir}/{post_type}.json"))
-                        .unwrap();
-                let mut content: Vec<Post> = serde_json::from_str(content_file.as_str()).unwrap();
+                    fs::read_to_string(format!("{project_name}/{data_dir}/{post_type}.json"))?;
+                let mut content: Vec<Post> = serde_json::from_str(content_file.as_str())?;
                 let mut post = Post::default();
                 post.title = generate_command.title.to_owned();
                 content.push(post);
 
                 make_file(
                     &format!("{project_name}/{data_dir}/{post_type}.json"),
-                    &serde_json::to_string_pretty(&content).unwrap(),
-                );
+                    &serde_json::to_string_pretty(&content)?,
+                )?;
                 make_file(
                     &format!("{project_name}/{post_type}/{post_title}.jinja"),
                     &html::BLOG_POST.to_owned(),
-                )
+                )?;
+                Ok(())
                 // Create file
             } else {
-                println!("Sorry, content not found!")
+                println!("Sorry, content not found!");
+                Ok(())
             }
         }
     }
