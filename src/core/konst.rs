@@ -1,5 +1,6 @@
 pub const CONFIG_FILE: &str = "config.json";
 pub const PROC_FILE: &str = "Procfile";
+pub const PROC_FILE_DEV: &str = "Procfile.dev";
 pub const CSS_FRAMEWORK: &str = "tailwind";
 pub const SYNTAX_HIGHLIGHTER: &str = "highlightjs";
 pub const TAILWIND_CONFIG_FILE: &str = "tailwind.config.js";

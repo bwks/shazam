@@ -8,14 +8,15 @@ a minimal set of features.
 * ~~Build site~~
 * ~~HTTP server~~
 * ~~New post generator~~
-* Rebuild on file change
+* ~~Rebuild on file change~~
 
 ## Features
 * `TailwindCSS` - CSS framework
 * `HighlightJS` - Code block syntax highlighting
 * `Mini Jinja` - Post templates
-* `Development Server` - Built in
+* `Development Server` - Built with Axum
 * `Overmind` - Process monitoring
+* `Refelx` - Rebuild site in file change
 
 ## Getting Started
 * Install Overmind
@@ -70,21 +71,27 @@ Use `overmind` to start the dev server and begin tailwind file watcher.
 > overmind s
 
 # output
-system | Tmux socket name: overmind-shazam-nZC8sLz7XWjPtlGfwRXul
+system | Tmux socket name: overmind-shazam-JKQwwgZxb6JUmMUlSZ9Pp
 system | Tmux session ID: shazam
 system | Listening at ./.overmind.sock
-web    | Started with pid 749901...
+build  | Started with pid 763529...
+css    | Started with pid 763527...
+web    | Started with pid 763525...
 web    |     Finished dev [unoptimized + debuginfo] target(s) in 0.05s
-css    | Started with pid 749903...
 web    |      Running `target/debug/shazam build`
 web    | Project: `test` => building ...
 web    | Project: `test` => build complete
-web    |     Finished dev [unoptimized + debuginfo] target(s) in 0.05s
+web    |     Finished dev [unoptimized + debuginfo] target(s) in 0.04s
 web    |      Running `target/debug/shazam serve`
 web    | listening on 0.0.0.0:3000
 css    | 
 css    | Rebuilding...
-css    | Done in 164ms.
+css    | Done in 160ms.
 ```
 
 Now you can access the site via http from your browser.
+
+### Run the dev server with cargo
+```
+overmind s -f Procfile.dev
+```

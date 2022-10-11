@@ -6,8 +6,8 @@ use anyhow::Result;
 
 use crate::core::konst::{
     ASSETS_DIR, BLOG_DATA_FILE, BLOG_DIR, CONFIG_DIR, CONFIG_FILE, CSS_DIR, DATA_DIR,
-    HTML_INDEX_FILE, INCLUDES_DIR, LAYOUTS_DIR, OUTPUT_DIR, PROC_FILE, TAILWIND_CONFIG_FILE,
-    TAILWIND_INPUT_FILE, TEMPLATES_DIR,
+    HTML_INDEX_FILE, INCLUDES_DIR, LAYOUTS_DIR, OUTPUT_DIR, PROC_FILE, PROC_FILE_DEV,
+    TAILWIND_CONFIG_FILE, TAILWIND_INPUT_FILE, TEMPLATES_DIR,
 };
 
 use crate::model::config::Config;
@@ -102,6 +102,16 @@ pub fn init(project_name: String) -> Result<Config> {
         context!(project => project_name, output_dir => OUTPUT_DIR),
     )?;
     make_file(&PROC_FILE.to_owned(), &procfile_tmpl)?;
+
+    // Procfile.dev
+    source.add_template(PROC_FILE_DEV, proc::PROCFILE_DEV)?;
+    env.set_source(source.to_owned());
+    let procfile_dev_tmpl = render_template(
+        &env,
+        PROC_FILE_DEV,
+        context!(project => project_name, output_dir => OUTPUT_DIR),
+    )?;
+    make_file(&PROC_FILE_DEV.to_owned(), &procfile_dev_tmpl)?;
 
     load_templates(&mut env, &mut source, &config)?;
 
