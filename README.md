@@ -1,58 +1,90 @@
 # Shazam
-Shazam is a static site generator writen in Rust with 
+Shazam is a static site generator written in Rust with 
 a minimal set of features.
 
-# TODO
+## TODO
 * ~~Initialize Project~~
 * ~~Load Config~~
 * ~~Build site~~
 * ~~HTTP server~~
+* ~~New post generator~~
 * Rebuild on file change
-* New post generator
 
-# Features
+## Features
+* `TailwindCSS` - CSS framework
+* `HighlightJS` - Code block syntax highlighting
+* `Mini Jinja` - Post templates
+* `Development Server` - Built in
+* `Overmind` - Process monitoring
 
-## CSS
-* TailwindCSS
+## Getting Started
+* Install Overmind
+* Download tailwindcss binary
+* Download shazam binary
 
-## Javascript
-* HighlightJS
+### Initialize Project
+Use the `shazam init <project-name>` command to initialize a project.
+```
+shazam init test
+```
 
-## Template Engine
-* Mini Jinja
-
-## Process Watcher
-* Overmind
-
-## Folder Structure
-```test
+This will build a project named `test` with the following structure.
+```
+test
 ├── _site
-│   ├── blog
-│   │   └── index.html
-│   ├── css
-│   │   └── app.css
-│   ├── error
-│   ├── favicon
-│   ├── font
-│   ├── img
-│   ├── index.html
-│   └── js
+│   ├── blog
+│   │   ├── index.html
+│   │   └── test-blog
+│   │       └── index.html
+│   ├── css
+│   ├── error
+│   ├── favicon
+│   ├── font
+│   ├── img
+│   ├── index.html
+│   └── js
 ├── assets
-│   ├── css
-│   │   └── input.css
-│   ├── error
-│   ├── favicon
-│   ├── font
-│   ├── img
-│   └── js
+│   ├── css
+│   │   └── input.css
+│   ├── error
+│   ├── favicon
+│   ├── font
+│   ├── img
+│   └── js
 ├── blog
+│   └── test-blog.jinja
 ├── config
 ├── data
-│   └── data.json
+│   └── blog.json
 └── templates
     ├── includes
-    │   └── _footer.jinja
+    │   └── footer.jinja
     └── layouts
         ├── base.jinja
         └── blog.jinja
 ```
+
+### Dev Server
+Use `overmind` to start the dev server and begin tailwind file watcher.
+```
+> overmind s
+
+# output
+system | Tmux socket name: overmind-shazam-nZC8sLz7XWjPtlGfwRXul
+system | Tmux session ID: shazam
+system | Listening at ./.overmind.sock
+web    | Started with pid 749901...
+web    |     Finished dev [unoptimized + debuginfo] target(s) in 0.05s
+css    | Started with pid 749903...
+web    |      Running `target/debug/shazam build`
+web    | Project: `test` => building ...
+web    | Project: `test` => build complete
+web    |     Finished dev [unoptimized + debuginfo] target(s) in 0.05s
+web    |      Running `target/debug/shazam serve`
+web    | listening on 0.0.0.0:3000
+css    | 
+css    | Rebuilding...
+css    | Done in 164ms.
+```
+
+Now you can access the site via http from your browser.

@@ -132,7 +132,7 @@ pub fn init(project_name: String) -> Result<Config> {
 
     println!("Project: `{project_name}` => initialization complete");
     build()?;
-    return Ok(config);
+    Ok(config)
 }
 
 /// Build site
