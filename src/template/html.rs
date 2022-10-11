@@ -17,7 +17,7 @@ pub const BASE: &str = r#"<!DOCTYPE html>
       {% endblock content %}
     </main>
   </body>
-  {% include "includes/_footer.jinja" %}
+  {% include "includes/footer.jinja" %}
 </html>
 "#;
 

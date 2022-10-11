@@ -72,39 +72,31 @@ pub async fn init() {
         Commands::Generate(generate_command) => {
             let config_file = fs::read_to_string("config.json").unwrap();
             let config: Config = serde_json::from_str(config_file.as_str()).unwrap();
+            let project_name = config.project.to_owned();
+            let data_dir = config.data_dir.to_ascii_lowercase();
+            let post_title = dasherize(generate_command.title.to_owned());
+            let post_type = generate_command.content.to_owned();
 
-            println!("{}", generate_command.title);
-            println!("{}", generate_command.content);
             if config
                 .content_dirs
                 .iter()
                 .any(|e| generate_command.content.eq(e))
             {
                 // Update content{
-                let content_file = fs::read_to_string(format!(
-                    "{}/{}/{}.json",
-                    config.project, config.data_dir, generate_command.content
-                ))
-                .unwrap();
+                let content_file =
+                    fs::read_to_string(format!("{project_name}/{data_dir}/{post_type}.json"))
+                        .unwrap();
                 let mut content: Vec<Post> = serde_json::from_str(content_file.as_str()).unwrap();
                 let mut post = Post::default();
                 post.title = generate_command.title.to_owned();
                 content.push(post);
 
                 make_file(
-                    &format!(
-                        "{}/{}/{}.json",
-                        config.project, config.data_dir, generate_command.content
-                    ),
+                    &format!("{project_name}/{data_dir}/{post_type}.json"),
                     &serde_json::to_string_pretty(&content).unwrap(),
                 );
                 make_file(
-                    &format!(
-                        "{}/{}/{}.jinja",
-                        config.project,
-                        generate_command.content,
-                        dasherize(generate_command.title.to_owned())
-                    ),
+                    &format!("{project_name}/{post_type}/{post_title}.jinja"),
                     &html::BLOG_POST.to_owned(),
                 )
                 // Create file
