@@ -12,10 +12,7 @@ use crate::cmd::cli;
 #[tokio::main]
 async fn main() {
     match cli::init().await {
-        Ok(()) => {
-            println!("complete");
-            ExitCode::from(0)
-        }
+        Ok(()) => ExitCode::from(0),
         Err(e) => {
             eprintln!("{}", e);
             ExitCode::from(1)
