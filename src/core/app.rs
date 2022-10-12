@@ -165,6 +165,16 @@ pub fn build() -> Result<()> {
         let data_file = fs::read_to_string(format!("{project_name}/{data_dir}/{dir}.json"))?;
         let posts: Vec<Post> = serde_json::from_str(data_file.as_str())?;
 
+        let dir_tmpl = render_template(
+            &env,
+            &format!("{LAYOUTS_DIR}/{dir}.jinja"),
+            context!(project => project_name, posts => posts),
+        )?;
+        make_file(
+            &format!("{project_name}/{OUTPUT_DIR}/{dir}/{HTML_INDEX_FILE}"),
+            &dir_tmpl,
+        )?;
+
         for post in posts {
             let post_title = dasherize(post.title.to_owned());
             let file_name = format!("{post_title}.jinja");

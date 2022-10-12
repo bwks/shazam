@@ -6,7 +6,8 @@ use crate::http;
 use crate::model::config::Config;
 use crate::model::post::Post;
 use crate::template::html;
-use crate::util::text::dasherize;
+use crate::util::date_time::date_today;
+use crate::util::text::{capitalize, dasherize, title_case};
 use crate::{core::app, util::file_sys::make_file};
 
 use clap::{Args, Parser, Subcommand};
@@ -56,9 +57,13 @@ pub struct GenerateCmd {
     #[clap(short, long)]
     pub title: String,
 
-    /// Content Type
+    /// Description
     #[clap(short, long)]
-    pub content: String,
+    pub description: String,
+
+    /// Type of content <blog, about, etc..>
+    #[clap(short, long)]
+    pub content_type: String,
 }
 
 pub async fn init() -> Result<()> {
@@ -80,35 +85,35 @@ pub async fn init() -> Result<()> {
             let config_file = fs::read_to_string("config.json")?;
             let config: Config = serde_json::from_str(config_file.as_str())?;
             let project_name = config.project.to_owned();
-            let data_dir = config.data_dir.to_ascii_lowercase();
+            let data_dir = config.data_dir.to_owned();
             let post_title = dasherize(generate_command.title.to_owned());
-            let post_type = generate_command.content.to_owned();
+            let content_type = generate_command.content_type.to_owned();
 
             if config
                 .content_dirs
                 .iter()
-                .any(|e| generate_command.content.eq(e))
+                .any(|e| generate_command.content_type.eq(e))
             {
-                // Update content{
                 let content_file =
-                    fs::read_to_string(format!("{project_name}/{data_dir}/{post_type}.json"))?;
+                    fs::read_to_string(format!("{project_name}/{data_dir}/{content_type}.json"))?;
                 let mut content: Vec<Post> = serde_json::from_str(content_file.as_str())?;
                 let mut post = Post::default();
-                post.title = generate_command.title.to_owned();
+                post.title = title_case(generate_command.title.to_owned());
+                post.published_date = date_today();
+                post.description = capitalize(generate_command.description.to_owned());
                 content.push(post);
 
                 make_file(
-                    &format!("{project_name}/{data_dir}/{post_type}.json"),
+                    &format!("{project_name}/{data_dir}/{content_type}.json"),
                     &serde_json::to_string_pretty(&content)?,
                 )?;
                 make_file(
-                    &format!("{project_name}/{post_type}/{post_title}.jinja"),
+                    &format!("{project_name}/{content_type}/{post_title}.jinja"),
                     &html::BLOG_POST.to_owned(),
                 )?;
                 Ok(())
-                // Create file
             } else {
-                println!("Sorry, content not found!");
+                println!("Sorry, content type {content_type} not found!");
                 Ok(())
             }
         }

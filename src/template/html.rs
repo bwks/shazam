@@ -13,14 +13,19 @@ pub const BASE: &str = r#"<!DOCTYPE html>
   <body class="h-full antiailiased container mx-auto">
     <main>
       {% block page_header %}
-        <h1 class="text-2xl font-black">{{ project }} site</h1>
+        <h1 class="text-2xl font-black">{{ project | capitalize }} Site</h1>
       {% endblock page_header %}
       {% block content %}
         <a href="/blog/">Blogs</a>
       {% endblock content %}
     </main>
   </body>
-  {% include "includes/footer.jinja" %}
+  <footer>
+    <div class="text-lg text-indigo-500">
+      {% block footer_content %}
+      {% endblock footer_content %}
+    </div>
+  </footer>
 </html>
 "#;
 
@@ -31,10 +36,15 @@ pub const BLOG: &str = r#"{% extends "layouts/base.jinja" %}
 {% block content %}
   <div class="text-red-500">
     {% for post in posts %}
-      <a href="/blog/{{ post.title | dasherize }}">{{ post.title | title_case }} | {{ post.published_date }}</a>
+      <p>
+        <a href="/blog/{{ post.title | dasherize }}">{{ post.title | title_case }} | {{ post.published_date }}</a>
+      </p>
     {% endfor %}
   </div>
 {% endblock content %}
+{% block footer_content %}
+  <p><a href="/">Back to home</a></p>
+{% endblock footer_content %}
 "#;
 
 pub const BLOG_POST: &str = r#"{% extends "layouts/blog.jinja" %}
@@ -45,9 +55,9 @@ pub const BLOG_POST: &str = r#"{% extends "layouts/blog.jinja" %}
 {% block content %}
   Blog content here
 {% endblock content %}
+{% block footer_content %}
+  <p><a href="/blog">Back to blogs</a></p>
+{% endblock footer_content %}
 "#;
 
-pub const FOOTER: &str = r#"<footer>
-  <p>FOOTER</p>
-</footer>
-"#;
+pub const FOOTER: &str = r#"<p><a href="/">Back to home</a></p>"#;

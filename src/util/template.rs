@@ -12,6 +12,7 @@ use crate::util::text;
 /// Initialize template environment
 pub fn init_env() -> Environment<'static> {
     let mut env = Environment::new();
+    env.add_filter("capitalize", text::capitalize);
     env.add_filter("dasherize", text::dasherize);
     env.add_filter("title_case", text::title_case);
     env.add_filter("human_date", date_time::human_date);
