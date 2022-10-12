@@ -6,6 +6,6 @@ pub fn dasherize(source: String) -> String {
 }
 
 // Convert a string to title case
-pub fn title(source: String) -> String {
+pub fn title_case(source: String) -> String {
     titlecase(source.as_str())
 }

@@ -14,6 +14,7 @@ use crate::model::post::Post;
 use crate::template::html;
 use crate::template::proc;
 use crate::template::tailwind;
+use crate::util::date_time::date_today;
 use crate::util::file_sys::{make_dirs, make_file};
 use crate::util::template::{init_env, load_templates, render_template};
 use crate::util::text::dasherize;
@@ -50,7 +51,7 @@ pub fn init(project_name: String) -> Result<Config> {
 
     let mut blog_post = Post::default();
     blog_post.title = "test blog".to_owned();
-    blog_post.published_date = "2022/10/09".to_owned();
+    blog_post.published_date = date_today();
 
     // Files
     make_file(
