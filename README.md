@@ -6,9 +6,11 @@ a minimal set of features.
 * ~~Initialize Project~~
 * ~~Load Config~~
 * ~~Build site~~
-* ~~HTTP server~~
+* ~~Dev HTTP server~~
 * ~~New post generator~~
-* ~~Rebuild on file change~~
+* ~~Rebuild site on file change~~
+* Hot reload dev server on file change
+* Dockerize
 
 ## Features
 * `TailwindCSS` - CSS framework
@@ -21,6 +23,7 @@ a minimal set of features.
 ## Getting Started
 * Install Overmind
 * Download tailwindcss binary
+* Download reflex binary
 * Download shazam binary
 
 ### Initialize Project

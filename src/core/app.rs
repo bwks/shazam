@@ -1,6 +1,5 @@
 use minijinja::{context, Source};
 use std::fs;
-use std::io::prelude::*;
 
 use anyhow::Result;
 
@@ -152,37 +151,41 @@ pub fn build() -> Result<()> {
     let project_name = config.project.to_owned();
     let output_dir = config.output_dir.to_owned();
     let data_dir = config.data_dir.to_owned();
+    let content_dirs = config.content_dirs.to_owned();
 
     println!("Project: `{project_name}` => building ...");
 
     // Template environment
     let mut env = init_env();
     let mut source = Source::new();
-
-    let blog_file = fs::read_to_string(format!("{project_name}/{data_dir}/{BLOG_DATA_FILE}"))?;
-    let blog_posts: Vec<Post> = serde_json::from_str(blog_file.as_str())?;
-
     load_templates(&mut env, &mut source, &config)?;
 
-    // TODO: iterate all data files.
-    for post in blog_posts {
-        let post_title = dasherize(post.title.to_owned());
-        let file_name = format!("{post_title}.jinja");
-        make_dirs(
-            &format!("{project_name}/{output_dir}/blog"),
-            vec![post_title.to_owned()],
-        )?;
-        let template_string = fs::read_to_string(format!("{project_name}/blog/{file_name}"))?;
-        source.add_template(format!("blog/{file_name}"), template_string)?;
-        env.set_source(source.to_owned());
+    for dir in content_dirs {
+        let data_file = fs::read_to_string(format!("{project_name}/{data_dir}/{dir}.json"))?;
+        let posts: Vec<Post> = serde_json::from_str(data_file.as_str())?;
 
-        let tmpl = env.get_template(format!("blog/{file_name}").as_str())?;
-        let blog_tmpl = tmpl.render(context!(project => project_name, post => post))?;
-        let mut blog_file = fs::File::create(format!(
-            "{project_name}/{output_dir}/blog/{post_title}/{HTML_INDEX_FILE}",
-        ))?;
-        blog_file.write_all(blog_tmpl.as_bytes())?;
+        for post in posts {
+            let post_title = dasherize(post.title.to_owned());
+            let file_name = format!("{post_title}.jinja");
+            make_dirs(
+                &format!("{project_name}/{output_dir}/{dir}"),
+                vec![post_title.to_owned()],
+            )?;
+
+            let template_string = fs::read_to_string(format!("{project_name}/{dir}/{file_name}"))?;
+            source.add_template(format!("{dir}/{file_name}"), template_string)?;
+            env.set_source(source.to_owned());
+            let tmpl = render_template(
+                &env,
+                format!("{dir}/{file_name}").as_str(),
+                context!(project => project_name, post => post),
+            )?;
+            make_file(
+                &format!("{project_name}/{output_dir}/{dir}/{post_title}/{HTML_INDEX_FILE}"),
+                &tmpl,
+            )?;
+        }
+        println!("Project: `{project_name}` => build complete");
     }
-    println!("Project: `{project_name}` => build complete");
     Ok(())
 }
