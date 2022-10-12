@@ -7,10 +7,10 @@ pub struct Post {
     pub title: String,
     pub description: String,
     pub category: String,
-    pub published: bool,
+    pub publish: bool,
     pub tags: Vec<String>,
     pub references: Vec<String>,
     pub bibliography: Vec<String>,
-    pub toc_items: Vec<String>,
+    pub table_of_contents: Vec<String>,
     pub links: Vec<String>,
 }
