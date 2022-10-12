@@ -39,7 +39,8 @@ pub const BLOG: &str = r#"{% extends "layouts/base.jinja" %}
 
 pub const BLOG_POST: &str = r#"{% extends "layouts/blog.jinja" %}
 {% block page_header %}
-  <h1 class="text-2xl font-black">{{ post.title | titlecase }} | {{ post.published_date }}</h1>
+  <h1 class="text-2xl font-black">{{ post.title | titlecase }}</h1>
+  <p class="text-gray-500">published: {{ post.published_date }}</p>
 {% endblock page_header %}
 {% block content %}
   Blog content here
