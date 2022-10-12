@@ -9,6 +9,7 @@ a minimal set of features.
 * ~~Dev HTTP server~~
 * ~~New post generator~~
 * ~~Rebuild site on file change~~
+* Highlight JS
 * Hot reload dev server on file change
 * Dockerize
 
