@@ -1,7 +1,7 @@
 #! /usr/bin/sh
 
 # Clean up testing files
-rm Procfile*
-rm tailwind.config.js
-rm config.json
+rm -f Procfile*
+rm -f tailwind.config.js
+rm -f config.json
 rm -rf test/

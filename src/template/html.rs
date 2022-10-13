@@ -34,7 +34,7 @@ pub const BLOG: &str = r#"{% extends "layouts/base.jinja" %}
   <h1 class="text-2xl font-black">Blog Posts</h1>
 {% endblock page_header %}
 {% block content %}
-  <div class="text-red-500">
+  <div class="text-fuchsia-500">
     {% for post in posts %}
       <p>
         <a href="/blog/{{ post.title | parameterize }}">{{ post.title | title_case }} | {{ post.published_date }}</a>
@@ -53,7 +53,12 @@ pub const BLOG_POST: &str = r#"{% extends "layouts/blog.jinja" %}
   <p class="text-gray-500">published: {{ post.published_date | human_date }}</p>
 {% endblock page_header %}
 {% block content %}
-  Blog content here
+  <p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Nec dui nunc mattis enim ut tellus elementum sagittis vitae. Sagittis orci a scelerisque purus semper eget duis at tellus. Libero enim sed faucibus turpis. Nulla aliquet enim tortor at auctor. Venenatis cras sed felis eget velit aliquet. Viverra maecenas accumsan lacus vel facilisis. Sit amet nisl suscipit adipiscing bibendum. Mi tempus imperdiet nulla malesuada pellentesque elit eget gravida cum. Elementum integer enim neque volutpat. Pellentesque sit amet porttitor eget dolor morbi non arcu. Sed ullamcorper morbi tincidunt ornare massa eget. Orci dapibus ultrices in iaculis nunc. Venenatis tellus in metus vulputate eu. At auctor urna nunc id cursus metus aliquam eleifend.
+  </p>
+  <p>
+    Elementum tempus egestas sed sed risus pretium. Vitae ultricies leo integer malesuada nunc vel risus commodo. Tellus molestie nunc non blandit massa enim nec dui. Non consectetur a erat nam at. Sapien eget mi proin sed libero enim sed faucibus turpis. Sit amet est placerat in egestas. Pellentesque id nibh tortor id aliquet. Lacus sed turpis tincidunt id aliquet risus. Dolor morbi non arcu risus. Tortor posuere ac ut consequat semper.
+  </p>
 {% endblock content %}
 {% block footer_content %}
   <p><a href="/blog">Back to blogs</a></p>

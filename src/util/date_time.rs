@@ -10,7 +10,8 @@ pub fn date_today() -> String {
 /// date_string must be of the format 2022-10-30 (yyyy-mm-dd)
 /// Example: converts 2022-10-30 -> 30th of October 2022
 pub fn human_date(date_string: String) -> String {
-    let date = NaiveDate::parse_from_str(date_string.as_str(), "%Y-%m-%d").unwrap();
+    let date = NaiveDate::parse_from_str(date_string.as_str(), "%Y-%m-%d")
+        .unwrap_or(NaiveDate::from_ymd(1979, 01, 01));
     let day_suffix = match date.day() {
         1 | 21 | 31 => "st",
         2 | 22 => "nd",
