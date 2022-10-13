@@ -109,7 +109,7 @@ pub async fn init() -> Result<()> {
                 )?;
                 make_file(
                     &format!("{project_name}/{content_type}/{post_title}.jinja"),
-                    &html::BLOG_POST.to_owned(),
+                    &html::BLOG_POST_TEMPLATE.to_owned(),
                 )?;
                 Ok(())
             } else {

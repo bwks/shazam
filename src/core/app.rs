@@ -54,6 +54,7 @@ pub fn init(project_name: String) -> Result<Config> {
     blog_post.published_date = date_today();
 
     // Files
+    // Config files
     make_file(
         &CONFIG_FILE.to_owned(),
         &serde_json::to_string_pretty(&config)?,
@@ -66,23 +67,30 @@ pub fn init(project_name: String) -> Result<Config> {
         &format!("{project_name}/{ASSETS_DIR}/{CSS_DIR}/{TAILWIND_INPUT_FILE}"),
         &tailwind::CSS.to_owned(),
     )?;
+    // Templsate files
     make_file(
         &format!("{project_name}/{TEMPLATES_DIR}/{LAYOUTS_DIR}/base.jinja"),
-        &html::BASE.to_owned(),
+        &html::BASE_TEMPLATE.to_owned(),
     )?;
     make_file(
         &format!("{project_name}/{TEMPLATES_DIR}/{LAYOUTS_DIR}/blog.jinja"),
-        &html::BLOG.to_owned(),
-    )?;
-    make_file(
-        &format!("{project_name}/{BLOG_DIR}/test-blog.jinja"),
-        &html::BLOG_POST.to_owned(),
+        &html::BLOG_INDEX_TEMPLATE.to_owned(),
     )?;
     make_file(
         &format!("{project_name}/{TEMPLATES_DIR}/{INCLUDES_DIR}/footer.jinja"),
-        &html::FOOTER.to_owned(),
+        &html::FOOTER_TEMPLATE.to_owned(),
+    )?;
+    // Site files
+    make_file(
+        &format!("{project_name}/{project_name}.jinja"),
+        &html::SITE_INDEX_TEMPLATE.to_owned(),
+    )?;
+    make_file(
+        &format!("{project_name}/{BLOG_DIR}/test-blog.jinja"),
+        &html::BLOG_POST_TEMPLATE.to_owned(),
     )?;
 
+    // Render Files
     // Tailwind config file
     source.add_template(TAILWIND_CONFIG_FILE, tailwind::CONFIG)?;
     env.set_source(source.to_owned());
@@ -113,33 +121,6 @@ pub fn init(project_name: String) -> Result<Config> {
     )?;
     make_file(&PROC_FILE_DEV.to_owned(), &procfile_dev_tmpl)?;
 
-    load_templates(&mut env, &mut source, &config)?;
-
-    // Site index file
-    let base_tmpl = render_template(
-        &env,
-        &format!("{LAYOUTS_DIR}/base.jinja"),
-        context!(project => project_name),
-    )?;
-    make_file(
-        &format!("{project_name}/{OUTPUT_DIR}/{HTML_INDEX_FILE}"),
-        &base_tmpl,
-    )?;
-
-    // Blog index file
-    let blog_file = fs::read_to_string(format!("{project_name}/{DATA_DIR}/{BLOG_DATA_FILE}"))?;
-    let blog_posts: Vec<Post> = serde_json::from_str(blog_file.as_str())?;
-
-    let blog_tmpl = render_template(
-        &env,
-        &format!("{LAYOUTS_DIR}/blog.jinja"),
-        context!(project => project_name, posts => blog_posts),
-    )?;
-    make_file(
-        &format!("{project_name}/{OUTPUT_DIR}/{BLOG_DIR}/{HTML_INDEX_FILE}"),
-        &blog_tmpl,
-    )?;
-
     println!("Project: `{project_name}` => initialization complete");
     build()?;
     Ok(config)
@@ -160,6 +141,23 @@ pub fn build() -> Result<()> {
     let mut env = init_env();
     let mut source = Source::new();
     load_templates(&mut env, &mut source, &config)?;
+
+    // Site index file
+    let index_template_string = fs::read_to_string(format!("{project_name}/{project_name}.jinja"))?;
+    source.add_template(
+        format!("{project_name}/{project_name}.jinja"),
+        index_template_string,
+    )?;
+    env.set_source(source.to_owned());
+    let tmpl = render_template(
+        &env,
+        format!("{project_name}/{project_name}.jinja").as_str(),
+        context!(project => project_name, config => config),
+    )?;
+    make_file(
+        &format!("{project_name}/{output_dir}/{HTML_INDEX_FILE}"),
+        &tmpl,
+    )?;
 
     for dir in content_dirs {
         let data_file = fs::read_to_string(format!("{project_name}/{data_dir}/{dir}.json"))?;

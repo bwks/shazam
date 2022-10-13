@@ -20,8 +20,8 @@ pub fn init_env() -> Environment<'static> {
 }
 
 /// Render a template
-pub fn render_template(env: &Environment, template: &str, kontext: Value) -> Result<String> {
-    let tmpl = env.get_template(template)?;
+pub fn render_template(env: &Environment, template_name: &str, kontext: Value) -> Result<String> {
+    let tmpl = env.get_template(template_name)?;
     let r = tmpl.render(kontext)?;
     Ok(r)
 }
@@ -32,25 +32,22 @@ pub fn load_templates(env: &mut Environment, source: &mut Source, config: &Confi
     let project_name = config.project.to_owned();
     let template_dirs = config.template_dirs.to_owned();
 
-    let mut all_templates: Vec<String> = vec![];
     for dir in &template_dirs {
         for entry in fs::read_dir(format!("{project_name}/{TEMPLATES_DIR}/{dir}/"))? {
             let file = entry?.file_name().into_string();
             match file {
-                Ok(file) => {
-                    if file.ends_with(".jinja") || file.ends_with(".j2") {
-                        all_templates.push(format!("{dir}/{file}"))
+                Ok(file_name) => {
+                    if file_name.ends_with(".jinja") | file_name.ends_with(".j2") {
+                        let template_string = fs::read_to_string(format!(
+                            "{project_name}/{TEMPLATES_DIR}/{dir}/{file_name}"
+                        ))?;
+                        source.add_template(format!("{dir}/{file_name}"), template_string)?;
+                        env.set_source(source.to_owned());
                     }
                 }
                 Err(_) => bail!("error loading templates"),
             }
         }
-    }
-    for template in &all_templates {
-        let template_string =
-            fs::read_to_string(format!("{project_name}/{TEMPLATES_DIR}/{template}"))?;
-        source.add_template(template, template_string)?;
-        env.set_source(source.to_owned());
     }
     Ok(())
 }

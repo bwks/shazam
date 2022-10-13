@@ -1,4 +1,4 @@
-pub const BASE: &str = r#"<!DOCTYPE html>
+pub const BASE_TEMPLATE: &str = r#"<!DOCTYPE html>
 <html lang="en" class="h-full">
   <head>
     <meta charset="UTF-8">
@@ -16,7 +16,6 @@ pub const BASE: &str = r#"<!DOCTYPE html>
         <h1 class="text-2xl font-black">{{ project | capitalize }} Site</h1>
       {% endblock page_header %}
       {% block content %}
-        <a href="/blog/">Blogs</a>
       {% endblock content %}
     </main>
   </body>
@@ -29,7 +28,22 @@ pub const BASE: &str = r#"<!DOCTYPE html>
 </html>
 "#;
 
-pub const BLOG: &str = r#"{% extends "layouts/base.jinja" %}
+pub const SITE_INDEX_TEMPLATE: &str = r#"{% extends "layouts/base.jinja" %}
+{% block content %}
+  <p>
+    This is the main site
+  </p>
+  {% for content in config.content_dirs %}
+  <div class="text-fuchsia-500">
+    <p>
+      <a href="/{{ content }}/">{{ content }}</a>
+    </p>
+  </div>
+  {% endfor %}
+{% endblock content %}
+"#;
+
+pub const BLOG_INDEX_TEMPLATE: &str = r#"{% extends "layouts/base.jinja" %}
 {% block page_header %}
   <h1 class="text-2xl font-black">Blog Posts</h1>
 {% endblock page_header %}
@@ -47,7 +61,7 @@ pub const BLOG: &str = r#"{% extends "layouts/base.jinja" %}
 {% endblock footer_content %}
 "#;
 
-pub const BLOG_POST: &str = r#"{% extends "layouts/blog.jinja" %}
+pub const BLOG_POST_TEMPLATE: &str = r#"{% extends "layouts/blog.jinja" %}
 {% block page_header %}
   <h1 class="text-2xl font-black">{{ post.title | title_case }}</h1>
   <p class="text-gray-500">published: {{ post.published_date | human_date }}</p>
@@ -65,4 +79,4 @@ pub const BLOG_POST: &str = r#"{% extends "layouts/blog.jinja" %}
 {% endblock footer_content %}
 "#;
 
-pub const FOOTER: &str = r#"<p><a href="/">Back to home</a></p>"#;
+pub const FOOTER_TEMPLATE: &str = r#"<p><a href="/">Back to home</a></p>"#;
