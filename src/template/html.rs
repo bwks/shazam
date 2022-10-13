@@ -35,7 +35,7 @@ pub const SITE_INDEX_TEMPLATE: &str = r#"{% extends "layouts/base.jinja" %}
   </p>
   {% for content in config.content_dirs %}
   <div class="text-fuchsia-500">
-    <p>
+    <p class="no-underline hover:underline">
       <a href="/{{ content }}/">{{ content }}</a>
     </p>
   </div>
@@ -50,7 +50,7 @@ pub const BLOG_INDEX_TEMPLATE: &str = r#"{% extends "layouts/base.jinja" %}
 {% block content %}
   <div class="text-fuchsia-500">
     {% for post in posts %}
-      <p>
+      <p class="no-underline hover:underline">
         <a href="/blog/{{ post.title | parameterize }}">{{ post.title | title_case }} | {{ post.published_date }}</a>
       </p>
     {% endfor %}
