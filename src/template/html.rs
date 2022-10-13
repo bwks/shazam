@@ -8,6 +8,14 @@ pub const BASE_TEMPLATE: &str = r#"<!DOCTYPE html>
     <link rel="stylesheet" href="/css/app.css">
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
     <script src="/js/app.js"></script>
+
+    <link rel="stylesheet"
+      href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.6.0/build/styles/tokyo-night-dark.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.6.0/build/highlight.min.js"></script>
+
+    <!-- Initialize highlight.js -->
+    <script>hljs.initHighlightingOnLoad();</script>
+
     <title>{{ project }}</title>
   </head>
   <body class="h-full antiailiased container mx-auto">
@@ -73,6 +81,17 @@ pub const BLOG_POST_TEMPLATE: &str = r#"{% extends "layouts/blog.jinja" %}
   <p>
     Elementum tempus egestas sed sed risus pretium. Vitae ultricies leo integer malesuada nunc vel risus commodo. Tellus molestie nunc non blandit massa enim nec dui. Non consectetur a erat nam at. Sapien eget mi proin sed libero enim sed faucibus turpis. Sit amet est placerat in egestas. Pellentesque id nibh tortor id aliquet. Lacus sed turpis tincidunt id aliquet risus. Dolor morbi non arcu risus. Tortor posuere ac ut consequat semper.
   </p>
+
+  <div>
+    <pre>
+      <code class="language-rust hljs">
+fn main() {
+    // Print text to the console
+    println!("Hello World!");
+}
+      </code>
+    </pre>
+  </div>
 {% endblock content %}
 {% block footer_content %}
   <p><a href="/blog">Back to blogs</a></p>

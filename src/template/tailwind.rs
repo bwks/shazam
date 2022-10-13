@@ -3,6 +3,7 @@ module.exports = {
   content: [
     './{{ project }}/{{ output_dir }}/**/*.{html,js}'
   ],
+  safelist: [],
   theme: {
     extend: {},
   },
