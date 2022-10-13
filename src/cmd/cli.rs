@@ -7,7 +7,7 @@ use crate::model::config::Config;
 use crate::model::post::Post;
 use crate::template::html;
 use crate::util::date_time::date_today;
-use crate::util::text::{capitalize, dasherize, title_case};
+use crate::util::text::{capitalize, parameterize, title_case};
 use crate::{core::app, util::file_sys::make_file};
 
 use clap::{Args, Parser, Subcommand};
@@ -86,7 +86,7 @@ pub async fn init() -> Result<()> {
             let config: Config = serde_json::from_str(config_file.as_str())?;
             let project_name = config.project.to_owned();
             let data_dir = config.data_dir.to_owned();
-            let post_title = dasherize(generate_command.title.to_owned());
+            let post_title = parameterize(generate_command.title.to_owned());
             let content_type = generate_command.content_type.to_owned();
 
             if config

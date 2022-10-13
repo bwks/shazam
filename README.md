@@ -10,9 +10,9 @@ a minimal set of features.
 * ~~New post generator~~
 * ~~Rebuild site on file change~~
 * Highlight JS
-* Hot reload dev server on file change
 * GitHub actions
 * Dockerize
+* Hot reload dev server on file change
 
 ## Features
 * `TailwindCSS` - CSS framework

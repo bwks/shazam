@@ -37,7 +37,7 @@ pub const BLOG: &str = r#"{% extends "layouts/base.jinja" %}
   <div class="text-red-500">
     {% for post in posts %}
       <p>
-        <a href="/blog/{{ post.title | dasherize }}">{{ post.title | title_case }} | {{ post.published_date }}</a>
+        <a href="/blog/{{ post.title | parameterize }}">{{ post.title | title_case }} | {{ post.published_date }}</a>
       </p>
     {% endfor %}
   </div>

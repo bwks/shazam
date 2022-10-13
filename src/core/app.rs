@@ -17,7 +17,7 @@ use crate::template::tailwind;
 use crate::util::date_time::date_today;
 use crate::util::file_sys::{make_dirs, make_file};
 use crate::util::template::{init_env, load_templates, render_template};
-use crate::util::text::dasherize;
+use crate::util::text::parameterize;
 
 /// Initial site directories and files
 pub fn init(project_name: String) -> Result<Config> {
@@ -176,7 +176,7 @@ pub fn build() -> Result<()> {
         )?;
 
         for post in posts {
-            let post_title = dasherize(post.title.to_owned());
+            let post_title = parameterize(post.title.to_owned());
             let file_name = format!("{post_title}.jinja");
             make_dirs(
                 &format!("{project_name}/{output_dir}/{dir}"),
