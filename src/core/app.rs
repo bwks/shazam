@@ -1,14 +1,13 @@
-use minijinja::{context, Source};
 use std::fs;
 
 use anyhow::Result;
+use minijinja::{context, Source};
 
 use crate::core::konst::{
     ASSETS_DIR, BLOG_DATA_FILE, BLOG_DIR, CONFIG_DIR, CONFIG_FILE, CSS_DIR, DATA_DIR,
     HTML_INDEX_FILE, INCLUDES_DIR, LAYOUTS_DIR, OUTPUT_DIR, PROC_FILE, PROC_FILE_DEV,
     TAILWIND_CONFIG_FILE, TAILWIND_INPUT_FILE, TEMPLATES_DIR,
 };
-
 use crate::model::config::Config;
 use crate::model::post::Post;
 use crate::template::html;

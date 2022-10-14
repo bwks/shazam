@@ -28,3 +28,22 @@ pub fn human_date(date_string: String) -> String {
         date.year()
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::util::date_time::human_date;
+
+    #[test]
+    fn returns_date_as_humananize_string() {
+        let test_cases = vec![
+            ("2022-10-01".to_owned(), "1st of October 2022".to_owned()),
+            ("2022-10-22".to_owned(), "22nd of October 2022".to_owned()),
+            ("2022-10-03".to_owned(), "3rd of October 2022".to_owned()),
+            ("2022-10-30".to_owned(), "30th of October 2022".to_owned()),
+        ];
+        for t in test_cases {
+            let result = human_date(t.0);
+            assert_eq!(result, t.1);
+        }
+    }
+}
