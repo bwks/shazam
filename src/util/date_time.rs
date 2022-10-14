@@ -11,7 +11,7 @@ pub fn date_today() -> String {
 /// Example: converts 2022-10-30 -> 30th of October 2022
 pub fn human_date(date_string: String) -> String {
     let date = NaiveDate::parse_from_str(date_string.as_str(), "%Y-%m-%d")
-        .unwrap_or(NaiveDate::from_ymd(1979, 01, 01));
+        .unwrap_or_else(|_| NaiveDate::from_ymd(1970, 1, 1));
     let day_suffix = match date.day() {
         1 | 21 | 31 => "st",
         2 | 22 => "nd",

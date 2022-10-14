@@ -97,10 +97,12 @@ pub async fn init() -> Result<()> {
                 let content_file =
                     fs::read_to_string(format!("{project_name}/{data_dir}/{content_type}.json"))?;
                 let mut content: Vec<Post> = serde_json::from_str(content_file.as_str())?;
-                let mut post = Post::default();
-                post.title = title_case(generate_command.title.to_owned());
-                post.published_date = date_today();
-                post.description = capitalize(generate_command.description.to_owned());
+                let post = Post {
+                    title: title_case(generate_command.title.to_owned()),
+                    published_date: date_today(),
+                    description: capitalize(generate_command.description.to_owned()),
+                    ..Default::default()
+                };
                 content.push(post);
 
                 make_file(

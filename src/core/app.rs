@@ -40,17 +40,16 @@ pub fn init(project_name: String) -> Result<Config> {
         &format!("{project_name}/{ASSETS_DIR}"),
         asset_dirs.to_owned(),
     )?;
-    make_dirs(
-        &format!("{project_name}/{TEMPLATES_DIR}"),
-        template_dirs.to_owned(),
-    )?;
+    make_dirs(&format!("{project_name}/{TEMPLATES_DIR}"), template_dirs)?;
     make_dirs(&project_name, content_dirs.to_owned())?;
     make_dirs(&format!("{project_name}/{OUTPUT_DIR}"), content_dirs)?;
     make_dirs(&format!("{project_name}/{OUTPUT_DIR}"), asset_dirs)?;
 
-    let mut blog_post = Post::default();
-    blog_post.title = "test blog".to_owned();
-    blog_post.published_date = date_today();
+    let blog_post = Post {
+        title: "test blog".to_owned(),
+        published_date: date_today(),
+        ..Default::default()
+    };
 
     // Files
     // Config files
