@@ -1,5 +1,6 @@
 use anyhow::Result;
 use axum::{http::StatusCode, response::IntoResponse, routing::get_service, Router};
+use std::path::MAIN_SEPARATOR;
 use std::{fs, io, net::SocketAddr};
 use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -9,6 +10,8 @@ use crate::model::config::Config;
 pub async fn serve(ipv4_address: String, port: u16) -> Result<()> {
     let config_file = fs::read_to_string("config.json")?;
     let config: Config = serde_json::from_str(config_file.as_str())?;
+    let project_name = config.project;
+    let output_dir = config.output_dir;
 
     // HTTP Server
     tracing_subscriber::registry()
@@ -22,8 +25,7 @@ pub async fn serve(ipv4_address: String, port: u16) -> Result<()> {
     let app = Router::new().route(
         "/*path",
         get_service(ServeDir::new(format!(
-            "./{}/{}/",
-            config.project, config.output_dir
+            "{project_name}{MAIN_SEPARATOR}{output_dir}{MAIN_SEPARATOR}"
         )))
         .handle_error(handle_error)
         .layer(TraceLayer::new_for_http()),

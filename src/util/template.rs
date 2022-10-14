@@ -1,4 +1,5 @@
 use std::fs;
+use std::path::MAIN_SEPARATOR;
 
 use anyhow::{bail, Result};
 use minijinja::value::Value;
@@ -33,15 +34,20 @@ pub fn load_templates(env: &mut Environment, source: &mut Source, config: &Confi
     let template_dirs = config.template_dirs.to_owned();
 
     for dir in &template_dirs {
-        for entry in fs::read_dir(format!("{project_name}/{TEMPLATES_DIR}/{dir}/"))? {
+        for entry in fs::read_dir(format!(
+            "{project_name}{MAIN_SEPARATOR}{TEMPLATES_DIR}{MAIN_SEPARATOR}{dir}{MAIN_SEPARATOR}"
+        ))? {
             let file = entry?.file_name().into_string();
             match file {
                 Ok(file_name) => {
                     if file_name.ends_with(".jinja") | file_name.ends_with(".j2") {
                         let template_string = fs::read_to_string(format!(
-                            "{project_name}/{TEMPLATES_DIR}/{dir}/{file_name}"
+                            "{project_name}{MAIN_SEPARATOR}{TEMPLATES_DIR}{MAIN_SEPARATOR}{dir}{MAIN_SEPARATOR}{file_name}"
                         ))?;
-                        source.add_template(format!("{dir}/{file_name}"), template_string)?;
+                        source.add_template(
+                            format!("{dir}{MAIN_SEPARATOR}{file_name}"),
+                            template_string,
+                        )?;
                         env.set_source(source.to_owned());
                     }
                 }

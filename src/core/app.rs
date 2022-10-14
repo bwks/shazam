@@ -1,4 +1,5 @@
 use std::fs;
+use std::path::MAIN_SEPARATOR as PATH_SEP;
 
 use anyhow::Result;
 use minijinja::{context, Source};
@@ -37,13 +38,19 @@ pub fn init(project_name: String) -> Result<Config> {
     make_dirs(&project_name, vec![DATA_DIR.to_owned()])?;
     make_dirs(&project_name, vec![OUTPUT_DIR.to_owned()])?;
     make_dirs(
-        &format!("{project_name}/{ASSETS_DIR}"),
+        &format!("{project_name}{PATH_SEP}{ASSETS_DIR}"),
         asset_dirs.to_owned(),
     )?;
-    make_dirs(&format!("{project_name}/{TEMPLATES_DIR}"), template_dirs)?;
+    make_dirs(
+        &format!("{project_name}{PATH_SEP}{TEMPLATES_DIR}"),
+        template_dirs,
+    )?;
     make_dirs(&project_name, content_dirs.to_owned())?;
-    make_dirs(&format!("{project_name}/{OUTPUT_DIR}"), content_dirs)?;
-    make_dirs(&format!("{project_name}/{OUTPUT_DIR}"), asset_dirs)?;
+    make_dirs(
+        &format!("{project_name}{PATH_SEP}{OUTPUT_DIR}"),
+        content_dirs,
+    )?;
+    make_dirs(&format!("{project_name}{PATH_SEP}{OUTPUT_DIR}"), asset_dirs)?;
 
     let blog_post = Post {
         title: "test blog".to_owned(),
@@ -58,33 +65,39 @@ pub fn init(project_name: String) -> Result<Config> {
         &serde_json::to_string_pretty(&config)?,
     )?;
     make_file(
-        &format!("{project_name}/{DATA_DIR}/{BLOG_DATA_FILE}"),
+        &format!("{project_name}{PATH_SEP}{DATA_DIR}{PATH_SEP}{BLOG_DATA_FILE}"),
         &serde_json::to_string_pretty(&vec![blog_post])?,
     )?;
     make_file(
-        &format!("{project_name}/{ASSETS_DIR}/{CSS_DIR}/{TAILWIND_INPUT_FILE}"),
+        &format!("{project_name}{PATH_SEP}{ASSETS_DIR}{PATH_SEP}{CSS_DIR}{PATH_SEP}{TAILWIND_INPUT_FILE}"),
         &tailwind::CSS.to_owned(),
     )?;
     // Templsate files
     make_file(
-        &format!("{project_name}/{TEMPLATES_DIR}/{LAYOUTS_DIR}/base.jinja"),
+        &format!(
+            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{LAYOUTS_DIR}{PATH_SEP}base.jinja"
+        ),
         &html::BASE_TEMPLATE.to_owned(),
     )?;
     make_file(
-        &format!("{project_name}/{TEMPLATES_DIR}/{LAYOUTS_DIR}/blog.jinja"),
+        &format!(
+            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{LAYOUTS_DIR}{PATH_SEP}blog.jinja"
+        ),
         &html::BLOG_INDEX_TEMPLATE.to_owned(),
     )?;
     make_file(
-        &format!("{project_name}/{TEMPLATES_DIR}/{INCLUDES_DIR}/footer.jinja"),
+        &format!(
+            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{INCLUDES_DIR}{PATH_SEP}footer.jinja"
+        ),
         &html::FOOTER_TEMPLATE.to_owned(),
     )?;
     // Site files
     make_file(
-        &format!("{project_name}/{project_name}.jinja"),
+        &format!("{project_name}{PATH_SEP}{project_name}.jinja"),
         &html::SITE_INDEX_TEMPLATE.to_owned(),
     )?;
     make_file(
-        &format!("{project_name}/{BLOG_DIR}/test-blog.jinja"),
+        &format!("{project_name}{PATH_SEP}{BLOG_DIR}{PATH_SEP}test-blog.jinja"),
         &html::BLOG_POST_TEMPLATE.to_owned(),
     )?;
 
@@ -95,7 +108,7 @@ pub fn init(project_name: String) -> Result<Config> {
     let tailwind_tmpl = render_template(
         &env,
         TAILWIND_CONFIG_FILE,
-        context!(project => project_name, output_dir => OUTPUT_DIR),
+        context!(project => project_name, path_sep => PATH_SEP, output_dir => OUTPUT_DIR),
     )?;
     make_file(&TAILWIND_CONFIG_FILE.to_owned(), &tailwind_tmpl)?;
 
@@ -105,7 +118,7 @@ pub fn init(project_name: String) -> Result<Config> {
     let procfile_tmpl = render_template(
         &env,
         PROC_FILE,
-        context!(project => project_name, output_dir => OUTPUT_DIR),
+        context!(project => project_name, path_sep => PATH_SEP, output_dir => OUTPUT_DIR),
     )?;
     make_file(&PROC_FILE.to_owned(), &procfile_tmpl)?;
 
@@ -115,7 +128,7 @@ pub fn init(project_name: String) -> Result<Config> {
     let procfile_dev_tmpl = render_template(
         &env,
         PROC_FILE_DEV,
-        context!(project => project_name, output_dir => OUTPUT_DIR),
+        context!(project => project_name, path_sep => PATH_SEP, output_dir => OUTPUT_DIR),
     )?;
     make_file(&PROC_FILE_DEV.to_owned(), &procfile_dev_tmpl)?;
 
@@ -141,33 +154,38 @@ pub fn build() -> Result<()> {
     load_templates(&mut env, &mut source, &config)?;
 
     // Site index file
-    let index_template_string = fs::read_to_string(format!("{project_name}/{project_name}.jinja"))?;
+    let index_template_string =
+        fs::read_to_string(format!("{project_name}{PATH_SEP}{project_name}.jinja"))?;
     source.add_template(
-        format!("{project_name}/{project_name}.jinja"),
+        format!("{project_name}{PATH_SEP}{project_name}.jinja"),
         index_template_string,
     )?;
     env.set_source(source.to_owned());
     let tmpl = render_template(
         &env,
-        format!("{project_name}/{project_name}.jinja").as_str(),
+        format!("{project_name}{PATH_SEP}{project_name}.jinja").as_str(),
         context!(project => project_name, config => config),
     )?;
     make_file(
-        &format!("{project_name}/{output_dir}/{HTML_INDEX_FILE}"),
+        &format!("{project_name}{PATH_SEP}{output_dir}{PATH_SEP}{HTML_INDEX_FILE}"),
         &tmpl,
     )?;
 
     for dir in content_dirs {
-        let data_file = fs::read_to_string(format!("{project_name}/{data_dir}/{dir}.json"))?;
+        let data_file = fs::read_to_string(format!(
+            "{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{dir}.json"
+        ))?;
         let posts: Vec<Post> = serde_json::from_str(data_file.as_str())?;
 
         let dir_tmpl = render_template(
             &env,
-            &format!("{LAYOUTS_DIR}/{dir}.jinja"),
+            &format!("{LAYOUTS_DIR}{PATH_SEP}{dir}.jinja"),
             context!(project => project_name, posts => posts),
         )?;
         make_file(
-            &format!("{project_name}/{OUTPUT_DIR}/{dir}/{HTML_INDEX_FILE}"),
+            &format!(
+                "{project_name}{PATH_SEP}{OUTPUT_DIR}{PATH_SEP}{dir}{PATH_SEP}{HTML_INDEX_FILE}"
+            ),
             &dir_tmpl,
         )?;
 
@@ -175,20 +193,22 @@ pub fn build() -> Result<()> {
             let post_title = parameterize(post.title.to_owned());
             let file_name = format!("{post_title}.jinja");
             make_dirs(
-                &format!("{project_name}/{output_dir}/{dir}"),
+                &format!("{project_name}{PATH_SEP}{output_dir}{PATH_SEP}{dir}"),
                 vec![post_title.to_owned()],
             )?;
 
-            let template_string = fs::read_to_string(format!("{project_name}/{dir}/{file_name}"))?;
-            source.add_template(format!("{dir}/{file_name}"), template_string)?;
+            let template_string = fs::read_to_string(format!(
+                "{project_name}{PATH_SEP}{dir}{PATH_SEP}{file_name}"
+            ))?;
+            source.add_template(format!("{dir}{PATH_SEP}{file_name}"), template_string)?;
             env.set_source(source.to_owned());
             let tmpl = render_template(
                 &env,
-                format!("{dir}/{file_name}").as_str(),
+                format!("{dir}{PATH_SEP}{file_name}").as_str(),
                 context!(project => project_name, post => post),
             )?;
             make_file(
-                &format!("{project_name}/{output_dir}/{dir}/{post_title}/{HTML_INDEX_FILE}"),
+                &format!("{project_name}{PATH_SEP}{output_dir}{PATH_SEP}{dir}{PATH_SEP}{post_title}{PATH_SEP}{HTML_INDEX_FILE}"),
                 &tmpl,
             )?;
         }

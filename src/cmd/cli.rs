@@ -1,4 +1,5 @@
 use std::fs;
+use std::path::MAIN_SEPARATOR;
 
 use anyhow::Result;
 
@@ -94,8 +95,9 @@ pub async fn init() -> Result<()> {
                 .iter()
                 .any(|e| generate_command.content_type.eq(e))
             {
-                let content_file =
-                    fs::read_to_string(format!("{project_name}/{data_dir}/{content_type}.json"))?;
+                let content_file = fs::read_to_string(format!(
+                    "{project_name}{MAIN_SEPARATOR}{data_dir}{MAIN_SEPARATOR}{content_type}.json"
+                ))?;
                 let mut content: Vec<Post> = serde_json::from_str(content_file.as_str())?;
                 let post = Post {
                     title: title_case(generate_command.title.to_owned()),
@@ -106,11 +108,11 @@ pub async fn init() -> Result<()> {
                 content.push(post);
 
                 make_file(
-                    &format!("{project_name}/{data_dir}/{content_type}.json"),
+                    &format!("{project_name}{MAIN_SEPARATOR}{data_dir}{MAIN_SEPARATOR}{content_type}.json"),
                     &serde_json::to_string_pretty(&content)?,
                 )?;
                 make_file(
-                    &format!("{project_name}/{content_type}/{post_title}.jinja"),
+                    &format!("{project_name}{MAIN_SEPARATOR}{content_type}{MAIN_SEPARATOR}{post_title}.jinja"),
                     &html::BLOG_POST_TEMPLATE.to_owned(),
                 )?;
                 Ok(())
