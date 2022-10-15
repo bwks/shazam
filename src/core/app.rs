@@ -75,9 +75,9 @@ pub fn init(project_name: String) -> Result<Config> {
     // Templsate files
     make_file(
         &format!(
-            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{LAYOUTS_DIR}{PATH_SEP}base.jinja"
+            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{LAYOUTS_DIR}{PATH_SEP}site.jinja"
         ),
-        &html::BASE_TEMPLATE.to_owned(),
+        &html::SITE_TEMPLATE.to_owned(),
     )?;
     make_file(
         &format!(
@@ -90,6 +90,12 @@ pub fn init(project_name: String) -> Result<Config> {
             "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{INCLUDES_DIR}{PATH_SEP}footer.jinja"
         ),
         &html::FOOTER_TEMPLATE.to_owned(),
+    )?;
+    make_file(
+        &format!(
+            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{INCLUDES_DIR}{PATH_SEP}lorem-ipsum.jinja"
+        ),
+        &html::LOREM_IPSUM.to_owned(),
     )?;
     // Site files
     make_file(
