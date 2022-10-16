@@ -11,6 +11,7 @@ use crate::core::konst::{
 };
 use crate::model::config::Config;
 use crate::model::post::Post;
+use crate::string_vec;
 use crate::template::html;
 use crate::template::proc;
 use crate::template::tailwind;
@@ -54,7 +55,9 @@ pub fn init(project_name: String) -> Result<Config> {
 
     let blog_post = Post {
         title: "test blog".to_owned(),
+        description: "This is a sample blog post".to_owned(),
         published_date: date_today(),
+        tags: string_vec!["stuff", "things"],
         ..Default::default()
     };
 
@@ -103,6 +106,19 @@ pub fn init(project_name: String) -> Result<Config> {
         ),
         &html::PAGE_HEADER_TEMPLATE.to_owned(),
     )?;
+    make_file(
+        &format!(
+            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{INCLUDES_DIR}{PATH_SEP}link-to.jinja"
+        ),
+        &html::LINK_TO_TEMPLATE.to_owned(),
+    )?;
+    make_file(
+        &format!(
+            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{INCLUDES_DIR}{PATH_SEP}tags.jinja"
+        ),
+        &html::TAGS_TEMPLATE.to_owned(),
+    )?;
+
     // Site files
     make_file(
         &format!("{project_name}{PATH_SEP}{project_name}.jinja"),

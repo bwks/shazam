@@ -1,4 +1,6 @@
 pub const SITE_TEMPLATE: &str = r#"{% from "includes/page-header.jinja" import page_header %}
+{% from "includes/link-to.jinja" import link_to %}
+{% from "includes/tags.jinja" import tags %}
 <!DOCTYPE html>
 <html lang="en" class="h-full">
   <head>
@@ -20,35 +22,34 @@ pub const SITE_TEMPLATE: &str = r#"{% from "includes/page-header.jinja" import p
     <title>{{ project }}</title>
   </head>
   <body class="h-full antiailiased container mx-auto">
-    <main>
-      {% block page_header %}
-        {{ page_header(heading=project) }}
-      {% endblock page_header %}
-      <div class="py-5 pl-5">
-        {% block content %}
-        {% endblock content %}
-      </div>
-    </main>
+    {% block page_header %}
+      {{ page_header(heading=project + " Site") }}
+    {% endblock page_header %}
+    <div class="pl-5">
+      {% block content %}
+      {% endblock content %}
+    </div>
   </body>
   <footer>
     <div class="text-lg text-indigo-500 pl-5">
-      {% block footer_content %}
+      {% block page_footer %}
         {% include "includes/footer.jinja" %}
-      {% endblock footer_content %}
+      {% endblock page_footer %}
     </div>
   </footer>
 </html>
+
 "#;
 
 pub const SITE_INDEX_TEMPLATE: &str = r#"{% extends "layouts/site.jinja" %}
 {% block content %}
   <div>
-    <h3 class="font-bold text-lg">Post Categories</h3>
+    <h3 class="font-bold text-2xl">Post Categories</h3>
   </div>
   {% for content in config.content_dirs %}
     <div class="py-2 max-w-sm">
-      <div class="py-2 pl-2 border-4 rounded">
-        <a class="no-underline hover:underline" href="/{{ content }}/">{{ content }}</a>
+      <div class="block p-4 rounded-lg shadow-lg bg-white border-2 max-w-xs">
+        <a class="no-underline hover:underline" href="/{{ content }}/">{{ content | capitalize }}</a>
       </div>
     </div>
   {% endfor %}
@@ -62,8 +63,8 @@ pub const BLOG_INDEX_TEMPLATE: &str = r#"{% extends "layouts/site.jinja" %}
 {% block content %}
   <div class="text-fuchsia-500">
     {% for post in posts %}
-      <div class="py-2 max-w-sm">
-        <div class="py-2 pl-2 border-4 rounded">
+      <div class="py-2">
+        <div class="block p-4 rounded-lg shadow-lg bg-white border-2 max-w-xs">
           <a class="no-underline hover:underline" href="/blog/{{ post.title | parameterize }}">{{ post.title | title_case }}</a>
           <p class="text-gray-400 text-sm">
             published: {{ post.published_date }}
@@ -76,9 +77,9 @@ pub const BLOG_INDEX_TEMPLATE: &str = r#"{% extends "layouts/site.jinja" %}
     {% endfor %}
   </div>
 {% endblock content %}
-{% block footer_content %}
-  <p><a class="hover:underline" href="/">Back to home</a></p>
-{% endblock footer_content %}
+{% block page_footer %}
+  {{ link_to(link="/", description="Back to home") }}
+{% endblock page_footer %}
 "#;
 
 pub const BLOG_POST_TEMPLATE: &str = r#"{% extends "layouts/blog.jinja" %}
@@ -89,20 +90,21 @@ pub const BLOG_POST_TEMPLATE: &str = r#"{% extends "layouts/blog.jinja" %}
   <div class="px-5">
     {% include "includes/lorem-ipsum.jinja" %}
   </div>
-  <div class="px-5">
-    <pre>
-      <code class="language-rust hljs">
+  <div class="px-5 py-3">
+    <pre><code class="language-rust hljs">
 fn main() {
     // Print text to the console
     println!("Hello World!");
 }
-      </code>
-    </pre>
+    </code></pre>
   </div>
+  {% if post.tags %}
+    {{ tags(tags=post.tags) }}
+  {% endif %}
 {% endblock content %}
-{% block footer_content %}
-  <p><a class="hover:underline" href="/blog">Back to blogs</a></p>
-{% endblock footer_content %}
+{% block page_footer %}
+  {{ link_to(link="/blog", description="Back to blogs") }}
+{% endblock page_footer %}
 "#;
 
 pub const FOOTER_TEMPLATE: &str = r#"<p>I'm a footer</p>"#;
@@ -117,11 +119,29 @@ pub const LOREM_IPSUM_TEMPLATE: &str = r#"<p class="py-2">
 
 pub const PAGE_HEADER_TEMPLATE: &str = r#"{% macro page_header(heading, published_date="") %}
 <div class="pt-5 pl-5">
-  <h1 class="text-2xl font-black">{{ heading | title_case }}</h1>
+  <h1 class="text-5xl pb-3 font-black">{{ heading | title_case }}</h1>
   {% if published_date %}
     <p class="text-gray-500">published: {{ published_date | human_date }}</p>
   {% endif %}
 </div>
 {% endmacro %}
 {% set alias = page_header %}
+"#;
+
+pub const LINK_TO_TEMPLATE: &str = r#"{% macro link_to(link, description="") %}
+<div class="">
+  <a class="no-underline hover:underline" href="{{ link }}">{{ description if description else link }}</a>
+</div>
+{% endmacro %}
+{% set alias = link_to %}
+"#;
+
+pub const TAGS_TEMPLATE: &str = r#"{% macro tags(tags) %}
+<div class="py-3">
+  {% for tag in tags %}
+      <div class="inline-block px-2.5 py-1 bg-rose-200 text-rose-800 text-s font-semibold italic leading-tight lowercase rounded shadow-md">{{ tag }}</div>
+    {% endfor %}
+</div>
+{% endmacro %}
+{% set alias = tags %}
 "#;
