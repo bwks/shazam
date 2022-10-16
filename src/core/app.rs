@@ -95,7 +95,13 @@ pub fn init(project_name: String) -> Result<Config> {
         &format!(
             "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{INCLUDES_DIR}{PATH_SEP}lorem-ipsum.jinja"
         ),
-        &html::LOREM_IPSUM.to_owned(),
+        &html::LOREM_IPSUM_TEMPLATE.to_owned(),
+    )?;
+    make_file(
+        &format!(
+            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{INCLUDES_DIR}{PATH_SEP}page-header.jinja"
+        ),
+        &html::PAGE_HEADER_TEMPLATE.to_owned(),
     )?;
     // Site files
     make_file(
