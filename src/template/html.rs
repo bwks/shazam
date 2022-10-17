@@ -17,76 +17,94 @@ pub const SITE_TEMPLATE: &str = r#"{% from "includes/page-header.jinja" import p
     <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.6.0/build/highlight.min.js"></script>
 
     <!-- Initialize highlight.js -->
-    <script>hljs.initHighlightingOnLoad();</script>
+    <script>hljs.highlightAll();</script>
 
     <title>{{ project }}</title>
   </head>
-  <body class="h-full antiailiased container mx-auto">
+
+  <body class="antiailiased grid place-items-center">
     {% block page_header %}
       {{ page_header(heading=project + " Site") }}
     {% endblock page_header %}
-    <div class="pl-5">
-      {% block content %}
-      {% endblock content %}
+
+    <div class="w-3/4 px-10">
+      {% block page_content %}
+      {% endblock page_content %}
     </div>
+
+    {% block page_tags %}
+    {% endblock page_tags %}
   </body>
+
   <footer>
-    <div class="text-lg text-indigo-500 pl-5">
+    <div class="text-lg text-indigo-500">
       {% block page_footer %}
         {% include "includes/footer.jinja" %}
       {% endblock page_footer %}
     </div>
   </footer>
 </html>
-
 "#;
 
 pub const SITE_INDEX_TEMPLATE: &str = r#"{% extends "layouts/site.jinja" %}
-{% block content %}
-  <div>
-    <h3 class="font-bold text-2xl">Post Categories</h3>
+{% block page_content %}
+  <div class="grid place-items-center">
+    <h3 class="font-medium text-2xl">Super Awesome Post Categories</h3>
   </div>
   {% for content in config.content_dirs %}
-    <div class="py-2 max-w-sm">
-      <div class="block p-4 rounded-lg shadow-lg bg-white border-2 max-w-xs">
-        <a class="no-underline hover:underline" href="/{{ content }}/">{{ content | capitalize }}</a>
+    <div class="py-2">
+      <div class="block p-4 rounded-lg shadow-lg bg-white border-2">
+        <a class="text-fuchsia-500 font-semibold text-xl no-underline hover:underline" href="/{{ content }}/">{{ content | capitalize }}</a>
       </div>
     </div>
   {% endfor %}
-{% endblock content %}
+{% endblock page_content %}
 "#;
 
 pub const BLOG_INDEX_TEMPLATE: &str = r#"{% extends "layouts/site.jinja" %}
+
 {% block page_header %}
-  {{ page_header(heading="Blog Posts") }}
+  {% if post %}
+    {{ page_header(heading=post.title, published_date=post.published_date) }}
+  {% else %}
+    {{ page_header(heading="Blog Posts") }}
+  {% endif %}
 {% endblock page_header %}
-{% block content %}
-  <div class="text-fuchsia-500">
+
+{% block page_content %}
+  <div class="">
     {% for post in posts %}
       <div class="py-2">
-        <div class="block p-4 rounded-lg shadow-lg bg-white border-2 max-w-xs">
-          <a class="no-underline hover:underline" href="/blog/{{ post.title | parameterize }}">{{ post.title | title_case }}</a>
-          <p class="text-gray-400 text-sm">
+        <div class="block p-4 rounded-lg shadow-lg bg-white border-2">
+          <a class="text-fuchsia-500 font-semibold text-xl no-underline hover:underline" href="/blog/{{ post.title | parameterize }}">{{ post.title | title_case }}</a>
+          <p class="text-gray-400 text-md italic">
             published: {{ post.published_date }}
           </p>
-          <p class="text-gray-800">
+          <p class="text-gray-800 text-lg">
             {{ post.description }}
           </p>
+          <div class="">
+            {{ tags(tags=post.tags) }}
+          </div>
         </div>
       </div>
     {% endfor %}
   </div>
-{% endblock content %}
+{% endblock page_content %}
+
+{% block page_tags %}
+  {% if post %}
+    {{ tags(tags=post.tags) }}
+  {% endif %}
+{% endblock page_tags %}
+
 {% block page_footer %}
   {{ link_to(link="/", description="Back to home") }}
 {% endblock page_footer %}
 "#;
 
 pub const BLOG_POST_TEMPLATE: &str = r#"{% extends "layouts/blog.jinja" %}
-{% block page_header %}
-  {{ page_header(heading=post.title, published_date=post.published_date) }}
-{% endblock page_header %}
-{% block content %}
+{% block page_content %}
   <div class="px-5">
     {% include "includes/lorem-ipsum.jinja" %}
   </div>
@@ -98,10 +116,7 @@ fn main() {
 }
     </code></pre>
   </div>
-  {% if post.tags %}
-    {{ tags(tags=post.tags) }}
-  {% endif %}
-{% endblock content %}
+{% endblock page_content %}
 {% block page_footer %}
   {{ link_to(link="/blog", description="Back to blogs") }}
 {% endblock page_footer %}
@@ -118,10 +133,10 @@ pub const LOREM_IPSUM_TEMPLATE: &str = r#"<p class="py-2">
 "#;
 
 pub const PAGE_HEADER_TEMPLATE: &str = r#"{% macro page_header(heading, published_date="") %}
-<div class="pt-5 pl-5">
+<div class="pt-5">
   <h1 class="text-5xl pb-3 font-black">{{ heading | title_case }}</h1>
   {% if published_date %}
-    <p class="text-gray-500">published: {{ published_date | human_date }}</p>
+    <p class="text-gray-500 italic">published: {{ published_date | human_date }}</p>
   {% endif %}
 </div>
 {% endmacro %}
@@ -137,11 +152,13 @@ pub const LINK_TO_TEMPLATE: &str = r#"{% macro link_to(link, description="") %}
 "#;
 
 pub const TAGS_TEMPLATE: &str = r#"{% macro tags(tags) %}
-<div class="py-3">
-  {% for tag in tags %}
+{% if tags %}
+  <div class="py-3">
+    {% for tag in tags %}
       <div class="inline-block px-2.5 py-1 bg-rose-200 text-rose-800 text-s font-semibold italic leading-tight lowercase rounded shadow-md">{{ tag }}</div>
     {% endfor %}
-</div>
+  </div>
+{% endif %}
 {% endmacro %}
 {% set alias = tags %}
 "#;
