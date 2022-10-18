@@ -2,7 +2,7 @@ use crate::string_vec;
 
 use crate::core::konst::{
     BLOG_DIR, CONFIG_DIR, CSS_DIR, CSS_FRAMEWORK, DATA_DIR, ERROR_DIR, FAVICON_DIR, FONT_DIR,
-    IMG_DIR, INCLUDES_DIR, JS_DIR, LAYOUTS_DIR, OUTPUT_DIR, SYNTAX_HIGHLIGHTER,
+    IMG_DIR, INCLUDES_DIR, JS_DIR, LAYOUTS_DIR, MACROS_DIR, OUTPUT_DIR, SYNTAX_HIGHLIGHTER,
 };
 use serde::{Deserialize, Serialize};
 
@@ -28,7 +28,7 @@ impl Config {
             data_dir: DATA_DIR.to_owned(),
             output_dir: OUTPUT_DIR.to_owned(),
             asset_dirs: string_vec![CSS_DIR, JS_DIR, FONT_DIR, IMG_DIR, FAVICON_DIR, ERROR_DIR],
-            template_dirs: string_vec![LAYOUTS_DIR, INCLUDES_DIR],
+            template_dirs: string_vec![LAYOUTS_DIR, INCLUDES_DIR, MACROS_DIR],
             content_dirs: string_vec![BLOG_DIR],
         }
     }

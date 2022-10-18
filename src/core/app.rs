@@ -6,7 +6,7 @@ use minijinja::{context, Source};
 
 use crate::core::konst::{
     ASSETS_DIR, BLOG_DATA_FILE, BLOG_DIR, CONFIG_DIR, CONFIG_FILE, CSS_DIR, DATA_DIR,
-    HTML_INDEX_FILE, INCLUDES_DIR, LAYOUTS_DIR, OUTPUT_DIR, PROC_FILE, PROC_FILE_DEV,
+    HTML_INDEX_FILE, INCLUDES_DIR, LAYOUTS_DIR, MACROS_DIR, OUTPUT_DIR, PROC_FILE, PROC_FILE_DEV,
     TAILWIND_CONFIG_FILE, TAILWIND_INPUT_FILE, TEMPLATES_DIR,
 };
 use crate::model::config::Config;
@@ -35,9 +35,14 @@ pub fn init(project_name: String) -> Result<Config> {
 
     // Build project
     // Directories
-    make_dirs(&project_name, vec![CONFIG_DIR.to_owned()])?;
-    make_dirs(&project_name, vec![DATA_DIR.to_owned()])?;
-    make_dirs(&project_name, vec![OUTPUT_DIR.to_owned()])?;
+    make_dirs(
+        &project_name,
+        vec![
+            CONFIG_DIR.to_owned(),
+            DATA_DIR.to_owned(),
+            OUTPUT_DIR.to_owned(),
+        ],
+    )?;
     make_dirs(
         &format!("{project_name}{PATH_SEP}{ASSETS_DIR}"),
         asset_dirs.to_owned(),
@@ -80,43 +85,43 @@ pub fn init(project_name: String) -> Result<Config> {
         &format!(
             "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{LAYOUTS_DIR}{PATH_SEP}site.jinja"
         ),
-        &html::SITE_TEMPLATE.to_owned(),
+        &html::SITE_LAYOUT.to_owned(),
     )?;
     make_file(
         &format!(
             "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{LAYOUTS_DIR}{PATH_SEP}blog.jinja"
         ),
-        &html::BLOG_INDEX_TEMPLATE.to_owned(),
+        &html::BLOG_LAYOUT.to_owned(),
     )?;
     make_file(
         &format!(
             "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{INCLUDES_DIR}{PATH_SEP}footer.jinja"
         ),
-        &html::FOOTER_TEMPLATE.to_owned(),
+        &html::FOOTER_INCLUDE.to_owned(),
     )?;
     make_file(
         &format!(
             "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{INCLUDES_DIR}{PATH_SEP}lorem-ipsum.jinja"
         ),
-        &html::LOREM_IPSUM_TEMPLATE.to_owned(),
+        &html::LOREM_IPSUM_INCLUDE.to_owned(),
     )?;
     make_file(
         &format!(
-            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{INCLUDES_DIR}{PATH_SEP}page-header.jinja"
+            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{MACROS_DIR}{PATH_SEP}page-header.jinja"
         ),
-        &html::PAGE_HEADER_TEMPLATE.to_owned(),
+        &html::PAGE_HEADER_MACRO.to_owned(),
     )?;
     make_file(
         &format!(
-            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{INCLUDES_DIR}{PATH_SEP}link-to.jinja"
+            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{MACROS_DIR}{PATH_SEP}link-to.jinja"
         ),
-        &html::LINK_TO_TEMPLATE.to_owned(),
+        &html::LINK_TO_MACRO.to_owned(),
     )?;
     make_file(
         &format!(
-            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{INCLUDES_DIR}{PATH_SEP}tags.jinja"
+            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{MACROS_DIR}{PATH_SEP}tags.jinja"
         ),
-        &html::TAGS_TEMPLATE.to_owned(),
+        &html::TAGS_MACRO.to_owned(),
     )?;
 
     // Site files

@@ -14,6 +14,7 @@ pub const OUTPUT_DIR: &str = "_site";
 pub const TEMPLATES_DIR: &str = "templates";
 pub const LAYOUTS_DIR: &str = "layouts";
 pub const INCLUDES_DIR: &str = "includes";
+pub const MACROS_DIR: &str = "macros";
 pub const BLOG_DIR: &str = "blog";
 pub const CSS_DIR: &str = "css";
 pub const JS_DIR: &str = "js";
