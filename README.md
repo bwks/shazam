@@ -11,7 +11,7 @@ a minimal set of features.
 * ~~Rebuild site on file change~~
 * ~~Highlight JS~~
 * ~~GitHub actions~~
-* Dockerize
+* ~~Dockerize~~
 * Hot reload dev server on file change
 
 ## Features
@@ -31,7 +31,7 @@ a minimal set of features.
 ### Initialize Project
 Use the `shazam init <project-name>` command to initialize a project.
 ```
-shazam init test
+./shazam init test
 ```
 
 This will build a project named `test` with the following structure.
@@ -73,7 +73,7 @@ test
 ### Dev Server
 Use `overmind` to start the dev server and begin tailwind file watcher.
 ```
-> overmind s
+> ./overmind s
 
 # output
 system | Tmux socket name: overmind-shazam-JKQwwgZxb6JUmMUlSZ9Pp
@@ -98,5 +98,45 @@ Now you can access the site via http from your browser.
 
 ### Run the dev server with cargo
 ```
-overmind s -f Procfile.dev
+./overmind s -f Procfile.dev
+```
+
+## Docker
+Build the container using `docker compose`
+```
+docker compose \
+  -f docker-compose.yaml \
+  --env-file .env \
+  build \
+    --build-arg APP_USER=$USER \
+    --build-arg APP_NAME=test \
+    --build-arg APP_USER_ID=$UID \
+    --build-arg APP_GROUP_ID=$GID \
+    --build-arg HOME_DIR=$HOME
+```
+
+If you have not yet initialized a project, then run the following to 
+create the project files/folders in your current directory.
+```
+export APP_NAME="test" \
+  && docker container run -itd --name=shazam-tmp shazam ash \
+  && docker container cp shazam-tmp:$HOME/$APP_NAME $APP_NAME \
+  && docker container kill shazam-tmp \
+  && docker container rm shazam-tmp
+```
+
+Bring the container up
+```
+docker compose \
+  -f docker-compose.yaml \
+  --env-file .env \
+  up
+```
+
+Shut the container down when you are done.
+```
+docker compose \
+  -f docker-compose.yaml \
+  --env-file .env \
+  down
 ```

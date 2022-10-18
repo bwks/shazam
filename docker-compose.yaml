@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: shazam
+    user: "${APP_USER_ID}:${APP_GROUP_ID}"
+    volumes:
+      - "./${APP_NAME}:${HOME_DIR}/${APP_NAME}"
+    ports:
+      - "3000:3000"
+    environment:
+      - "APP_NAME=${APP_NAME}"
+      - "APP_USER_ID=${APP_USER_ID}"
+      - "APP_GROUP_ID=${APP_GROUP_ID}"
+      - "HOME_DIR=${HOME_DIR}"
