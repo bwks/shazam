@@ -2,6 +2,9 @@
 Shazam is a static site generator written in Rust with 
 a minimal set of features.
 
+## License
+[MIT](LICENSE-MIT).
+
 ## TODO
 * ~~Initialize Project~~
 * ~~Load Config~~
