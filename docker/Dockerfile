@@ -1,10 +1,8 @@
 FROM rust:1.64-alpine AS builder
 
-WORKDIR /opt/shazam/
+WORKDIR /opt/
 
-RUN apk add curl protoc musl-dev gzip
-
-COPY . .
+RUN apk add curl protoc musl-dev gzip git
 
 # tailwind
 RUN curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64 \
@@ -24,7 +22,9 @@ RUN curl -sLO https://github.com/DarthSim/overmind/releases/latest/download/over
   && mv overmind-v2.3.0-linux-amd64 overmind
 
 # shazam
-RUN cargo build --release
+RUN git clone https://github.com/bwks/shazam.git \
+  && cd shazam \
+  && cargo build --release
 
 #########################################################
 
@@ -47,9 +47,9 @@ RUN apk add tmux
 RUN addgroup -S ${APP_USER} -g ${APP_GROUP_ID}  && adduser -u ${APP_USER_ID} -S ${APP_USER} -G ${APP_USER} -s /bin/ash
 
 COPY --from=builder /opt/shazam/target/release/shazam ${HOME_DIR}/shazam
-COPY --from=builder /opt/shazam/tailwindcss ${HOME_DIR}/tailwindcss
-COPY --from=builder /opt/shazam/reflex ${HOME_DIR}/reflex
-COPY --from=builder /opt/shazam/overmind ${HOME_DIR}/overmind
+COPY --from=builder /opt/tailwindcss ${HOME_DIR}/tailwindcss
+COPY --from=builder /opt/reflex ${HOME_DIR}/reflex
+COPY --from=builder /opt/overmind ${HOME_DIR}/overmind
 
 # Set directory ownership
 RUN chown -R ${APP_USER_ID}:${APP_GROUP_ID} ${HOME_DIR}
