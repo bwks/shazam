@@ -16,7 +16,7 @@ use crate::template::html;
 use crate::template::proc;
 use crate::template::tailwind;
 use crate::util::date_time::date_today;
-use crate::util::file_sys::{make_dirs, make_file};
+use crate::util::file_sys::{copy_recursively, make_dirs, make_file};
 use crate::util::template::{init_env, load_templates, render_template};
 use crate::util::text::parameterize;
 
@@ -247,5 +247,11 @@ pub fn build() -> Result<()> {
         }
         println!("Project: `{project_name}` => build complete");
     }
+
+    // Move assets
+    copy_recursively(
+        format!("{project_name}{PATH_SEP}{ASSETS_DIR}"),
+        format!("{project_name}{PATH_SEP}{OUTPUT_DIR}"),
+    )?;
     Ok(())
 }

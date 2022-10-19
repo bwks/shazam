@@ -22,7 +22,6 @@ pub fn make_file(path: &String, content: &String) -> Result<()> {
 
 /// Copy files from source to destination recursively.
 /// https://nick.groenen.me/notes/recursively-copy-files-in-rust/
-#[allow(dead_code)]
 pub fn copy_recursively(source: impl AsRef<Path>, destination: impl AsRef<Path>) -> io::Result<()> {
     fs::create_dir_all(&destination)?;
     for entry in fs::read_dir(source)? {
