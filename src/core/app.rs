@@ -35,13 +35,10 @@ pub fn init(project_name: String) -> Result<Config> {
 
     // Build project
     // Directories
+    make_dirs(&format!(".{PATH_SEP}"), vec![CONFIG_DIR.to_owned()])?;
     make_dirs(
         &project_name,
-        vec![
-            CONFIG_DIR.to_owned(),
-            DATA_DIR.to_owned(),
-            OUTPUT_DIR.to_owned(),
-        ],
+        vec![DATA_DIR.to_owned(), OUTPUT_DIR.to_owned()],
     )?;
     make_dirs(
         &format!("{project_name}{PATH_SEP}{ASSETS_DIR}"),
@@ -69,7 +66,7 @@ pub fn init(project_name: String) -> Result<Config> {
     // Files
     // Config files
     make_file(
-        &CONFIG_FILE.to_owned(),
+        &format!("{CONFIG_DIR}{PATH_SEP}{CONFIG_FILE}"),
         &serde_json::to_string_pretty(&config)?,
     )?;
     make_file(
@@ -143,7 +140,10 @@ pub fn init(project_name: String) -> Result<Config> {
         TAILWIND_CONFIG_FILE,
         context!(project => project_name, path_sep => PATH_SEP, output_dir => OUTPUT_DIR),
     )?;
-    make_file(&TAILWIND_CONFIG_FILE.to_owned(), &tailwind_tmpl)?;
+    make_file(
+        &format!("{CONFIG_DIR}{PATH_SEP}{TAILWIND_CONFIG_FILE}"),
+        &tailwind_tmpl,
+    )?;
 
     // Procfile
     source.add_template(PROC_FILE, proc::PROCFILE)?;
@@ -151,7 +151,7 @@ pub fn init(project_name: String) -> Result<Config> {
     let procfile_tmpl = render_template(
         &env,
         PROC_FILE,
-        context!(project => project_name, path_sep => PATH_SEP, output_dir => OUTPUT_DIR),
+        context!(project => project_name, path_sep => PATH_SEP, output_dir => OUTPUT_DIR, config_dir => CONFIG_DIR, tailwind_config_file => TAILWIND_CONFIG_FILE),
     )?;
     make_file(&PROC_FILE.to_owned(), &procfile_tmpl)?;
 
@@ -161,7 +161,7 @@ pub fn init(project_name: String) -> Result<Config> {
     let procfile_dev_tmpl = render_template(
         &env,
         PROC_FILE_DEV,
-        context!(project => project_name, path_sep => PATH_SEP, output_dir => OUTPUT_DIR),
+        context!(project => project_name, path_sep => PATH_SEP, output_dir => OUTPUT_DIR, config_dir => CONFIG_DIR, tailwind_config_file => TAILWIND_CONFIG_FILE),
     )?;
     make_file(&PROC_FILE_DEV.to_owned(), &procfile_dev_tmpl)?;
 
@@ -172,7 +172,7 @@ pub fn init(project_name: String) -> Result<Config> {
 
 /// Build site
 pub fn build() -> Result<()> {
-    let config_file = fs::read_to_string(CONFIG_FILE)?;
+    let config_file = fs::read_to_string(format!("{CONFIG_DIR}{PATH_SEP}{CONFIG_FILE}"))?;
     let config: Config = serde_json::from_str(config_file.as_str())?;
     let project_name = config.project.to_owned();
     let output_dir = config.output_dir.to_owned();

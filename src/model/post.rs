@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Default, Serialize, Deserialize)]
 pub struct Post {
+    pub author: String,
+    pub author_email: String,
     pub published_date: String,
     pub updated_date: String,
     pub title: String,

@@ -1,14 +1,16 @@
 use anyhow::Result;
 use axum::{http::StatusCode, response::IntoResponse, routing::get_service, Router};
-use std::path::MAIN_SEPARATOR;
+use std::path::MAIN_SEPARATOR as PATH_SEP;
 use std::{fs, io, net::SocketAddr};
 use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
+use crate::core::konst::{CONFIG_DIR, CONFIG_FILE};
+
 use crate::model::config::Config;
 
 pub async fn serve(ipv4_address: String, port: u16) -> Result<()> {
-    let config_file = fs::read_to_string("config.json")?;
+    let config_file = fs::read_to_string(&format!("{CONFIG_DIR}{PATH_SEP}{CONFIG_FILE}"))?;
     let config: Config = serde_json::from_str(config_file.as_str())?;
     let project_name = config.project;
     let output_dir = config.output_dir;
@@ -25,12 +27,12 @@ pub async fn serve(ipv4_address: String, port: u16) -> Result<()> {
     let app = Router::new().route(
         "/*path",
         get_service(ServeDir::new(format!(
-            "{project_name}{MAIN_SEPARATOR}{output_dir}{MAIN_SEPARATOR}"
+            "{project_name}{PATH_SEP}{output_dir}{PATH_SEP}"
         )))
         .handle_error(handle_error)
         .layer(TraceLayer::new_for_http()),
     );
-    let addr: SocketAddr = format!("{}:{}", ipv4_address, port).parse()?;
+    let addr: SocketAddr = format!("{ipv4_address}:{port}").parse()?;
 
     println!("listening on {}", addr);
     axum::Server::bind(&addr)

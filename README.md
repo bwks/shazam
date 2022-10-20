@@ -108,8 +108,8 @@ Now you can access the site via http from your browser.
 Build the container using `docker compose`
 ```
 docker compose \
-  -f docker-compose.yaml \
-  --env-file .env \
+  -f docker/docker-compose.yaml \
+  --env-file docker/.env \
   build \
     --build-arg APP_USER=$USER \
     --build-arg APP_NAME=test \
@@ -124,6 +124,7 @@ create the project files/folders in your current directory.
 export APP_NAME="test" \
   && docker container run -itd --name=shazam-tmp shazam ash \
   && docker container cp shazam-tmp:$HOME/$APP_NAME $APP_NAME \
+  && docker container cp shazam-tmp:$HOME/config config \
   && docker container kill shazam-tmp \
   && docker container rm shazam-tmp
 ```
