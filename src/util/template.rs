@@ -1,54 +1,52 @@
 use std::fs;
-use std::path::MAIN_SEPARATOR;
+use std::path::MAIN_SEPARATOR as PATH_SEP;
 
 use anyhow::{bail, Result};
-use minijinja::value::Value;
-use minijinja::{Environment, Source};
+use tera::{Context, Tera};
 
 use crate::core::konst::TEMPLATES_DIR;
 use crate::model::config::Config;
-use crate::util::date_time;
-use crate::util::text;
+use crate::util::{date_time, text};
 
-/// Initialize template environment
-pub fn init_env() -> Environment<'static> {
-    let mut env = Environment::new();
-    env.add_filter("capitalize", text::capitalize);
-    env.add_filter("parameterize", text::parameterize);
-    env.add_filter("title_case", text::title_case);
-    env.add_filter("human_date", date_time::human_date);
-    env
+/// Truncate a string to the desired length
+// pub fn truncate(string: String, length: usize) -> String {
+//     let mut str_vec: Vec<&str> = string.split_whitespace().collect();
+//     str_vec.truncate(length);
+//     str_vec.join(" ")
+// }
+
+pub fn init_env(current_dir: &String, project: &String) -> Result<Tera> {
+    let mut env = Tera::new(&format!("{current_dir}/{project}/templates/**/*.jinja"))?;
+    env.register_filter("human_date", date_time::human_date);
+    env.register_filter("title_case", text::title_case);
+    Ok(env)
 }
 
 /// Render a template
-pub fn render_template(env: &Environment, template_name: &str, kontext: Value) -> Result<String> {
-    let tmpl = env.get_template(template_name)?;
-    let r = tmpl.render(kontext)?;
-    Ok(r)
+pub fn render_template(env: &Tera, template_name: &str, kontext: &Context) -> Result<String> {
+    let result = env.render(template_name, kontext)?;
+    Ok(result)
 }
 
 /// Load all project templaes into environment
 /// from the layouts and includes directories
-pub fn load_templates(env: &mut Environment, source: &mut Source, config: &Config) -> Result<()> {
+#[allow(dead_code)]
+pub fn load_templates(env: &mut Tera, config: &Config) -> Result<()> {
     let project_name = config.project.to_owned();
     let template_dirs = config.template_dirs.to_owned();
 
     for dir in &template_dirs {
         for entry in fs::read_dir(format!(
-            "{project_name}{MAIN_SEPARATOR}{TEMPLATES_DIR}{MAIN_SEPARATOR}{dir}{MAIN_SEPARATOR}"
+            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{dir}{PATH_SEP}"
         ))? {
             let file = entry?.file_name().into_string();
             match file {
                 Ok(file_name) => {
                     if file_name.ends_with(".jinja") | file_name.ends_with(".j2") {
-                        let template_string = fs::read_to_string(format!(
-                            "{project_name}{MAIN_SEPARATOR}{TEMPLATES_DIR}{MAIN_SEPARATOR}{dir}{MAIN_SEPARATOR}{file_name}"
-                        ))?;
-                        source.add_template(
-                            format!("{dir}{MAIN_SEPARATOR}{file_name}"),
-                            template_string,
-                        )?;
-                        env.set_source(source.to_owned());
+                        // let template_string = fs::read_to_string(format!(
+                        //     "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{dir}{PATH_SEP}{file_name}"
+                        // ))?;
+                        env.add_template_file(format!("{dir}{PATH_SEP}{file_name}"), None)?;
                     }
                 }
                 Err(_) => bail!("error loading templates"),

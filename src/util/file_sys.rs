@@ -1,16 +1,23 @@
+use std::env;
 use std::fs;
 use std::io;
 use std::path::Path;
-use std::path::MAIN_SEPARATOR;
+use std::path::MAIN_SEPARATOR as PATH_SEP;
 
-use anyhow::Result;
+use anyhow::{bail, Result};
+
+pub fn current_dir() -> Result<String> {
+    let cwd = env::current_dir()?;
+    match cwd.to_str() {
+        None => bail!("unable to get current working directory"),
+        Some(s) => Ok(s.to_owned()),
+    }
+}
 
 pub fn make_dirs(parent_path: &String, directories: Vec<String>) -> Result<()> {
     for d in directories {
-        fs::create_dir_all(format!("{parent_path}{MAIN_SEPARATOR}{d}"))?;
-        fs::File::create(format!(
-            "{parent_path}{MAIN_SEPARATOR}{d}{MAIN_SEPARATOR}.gitkeep"
-        ))?;
+        fs::create_dir_all(format!("{parent_path}{PATH_SEP}{d}"))?;
+        fs::File::create(format!("{parent_path}{PATH_SEP}{d}{PATH_SEP}.gitkeep"))?;
     }
     Ok(())
 }
