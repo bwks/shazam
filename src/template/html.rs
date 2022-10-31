@@ -1,6 +1,6 @@
-pub const SITE_LAYOUT: &str = r#"{% from "macros/page-header.jinja" import page_header %}
-{% from "macros/link-to.jinja" import link_to %}
-{% from "macros/tags.jinja" import tags %}
+pub const SITE_LAYOUT: &str = r#"{% import "macros/page-header.jinja" as page_header %}
+{% import "macros/link-to.jinja" as link_to %}
+{% import "macros/tags.jinja" as tags %}
 <!DOCTYPE html>
 <html lang="en" class="h-full">
   <head>
@@ -24,7 +24,7 @@ pub const SITE_LAYOUT: &str = r#"{% from "macros/page-header.jinja" import page_
 
   <body class="antiailiased grid place-items-center">
     {% block page_header %}
-      {{ page_header(heading=project + " Site") }}
+      {{ page_header::page_header(heading=project) }}
     {% endblock page_header %}
 
     <div class="w-3/4 px-10">
@@ -50,9 +50,9 @@ pub const BLOG_LAYOUT: &str = r#"{% extends "layouts/site.jinja" %}
 
 {% block page_header %}
   {% if post %}
-    {{ page_header(heading=post.title, published_date=post.published_date) }}
+    {{ page_header::page_header(heading=post.title, published_date=post.published_date) }}
   {% else %}
-    {{ page_header(heading="Blog Posts") }}
+    {{ page_header::page_header(heading="Blog Posts") }}
   {% endif %}
 {% endblock page_header %}
 
@@ -61,7 +61,7 @@ pub const BLOG_LAYOUT: &str = r#"{% extends "layouts/site.jinja" %}
     {% for post in posts %}
       <div class="py-2">
         <div class="block p-4 rounded-lg shadow-lg bg-white border-2">
-          <a class="text-fuchsia-500 font-semibold text-xl no-underline hover:underline" href="/blog/{{ post.title | parameterize }}">{{ post.title | title_case }}</a>
+          <a class="text-fuchsia-500 font-semibold text-xl no-underline hover:underline" href="/blog/{{ post.title | slugify }}">{{ post.title | title_case }}</a>
           <p class="text-gray-400 text-md italic">
             published: {{ post.published_date }}
           </p>
@@ -69,7 +69,7 @@ pub const BLOG_LAYOUT: &str = r#"{% extends "layouts/site.jinja" %}
             {{ post.description }}
           </p>
           <div class="">
-            {{ tags(tags=post.tags) }}
+            {{ tags::tags(tags=post.tags) }}
           </div>
         </div>
       </div>
@@ -79,12 +79,12 @@ pub const BLOG_LAYOUT: &str = r#"{% extends "layouts/site.jinja" %}
 
 {% block page_tags %}
   {% if post %}
-    {{ tags(tags=post.tags) }}
+    {{ tags::tags(tags=post.tags) }}
   {% endif %}
 {% endblock page_tags %}
 
 {% block page_footer %}
-  {{ link_to(link="/", description="Back to home") }}
+  {{ link_to::link_to(link="/", description="Back to home") }}
 {% endblock page_footer %}
 "#;
 
@@ -106,15 +106,13 @@ pub const PAGE_HEADER_MACRO: &str = r#"{% macro page_header(heading, published_d
   {% endif %}
 </div>
 {% endmacro %}
-{% set alias = page_header %}
 "#;
 
 pub const LINK_TO_MACRO: &str = r#"{% macro link_to(link, description="") %}
 <div class="">
-  <a class="no-underline hover:underline" href="{{ link }}">{{ description if description else link }}</a>
+  <a class="no-underline hover:underline" href="{{ link }}">{% if description %}{{ description }}{% else %}{{ link }}{% endif %}</a>
 </div>
 {% endmacro %}
-{% set alias = link_to %}
 "#;
 
 pub const TAGS_MACRO: &str = r#"{% macro tags(tags) %}
@@ -126,7 +124,6 @@ pub const TAGS_MACRO: &str = r#"{% macro tags(tags) %}
   </div>
 {% endif %}
 {% endmacro %}
-{% set alias = tags %}
 "#;
 
 pub const SITE_INDEX_TEMPLATE: &str = r#"{% extends "layouts/site.jinja" %}
@@ -159,6 +156,6 @@ fn main() {
   </div>
 {% endblock page_content %}
 {% block page_footer %}
-  {{ link_to(link="/blog", description="Back to blogs") }}
+  {{ link_to::link_to(link="/blog", description="Back to blogs") }}
 {% endblock page_footer %}
 "#;

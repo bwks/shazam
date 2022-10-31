@@ -1,8 +1,7 @@
-use std::fs;
 use std::path::MAIN_SEPARATOR as PATH_SEP;
 
 use anyhow::Result;
-use minijinja::{context, Source};
+use tera::Context;
 
 use crate::core::konst::{
     ASSETS_DIR, BLOG_DATA_FILE, BLOG_DIR, CONFIG_DIR, CONFIG_FILE, CSS_DIR, DATA_DIR,
@@ -10,19 +9,21 @@ use crate::core::konst::{
     TAILWIND_CONFIG_FILE, TAILWIND_INPUT_FILE, TEMPLATES_DIR,
 };
 use crate::model::config::Config;
-use crate::model::post::Post;
+use crate::model::post::{Post, Posts};
 use crate::string_vec;
 use crate::template::html;
 use crate::template::proc;
 use crate::template::tailwind;
 use crate::util::date_time::date_today;
-use crate::util::file_sys::{copy_recursively, make_dirs, make_file};
-use crate::util::template::{init_env, load_templates, render_template};
+use crate::util::file_sys::{copy_recursively, current_dir, make_dirs, make_file};
+use crate::util::helper::load_config;
+use crate::util::template::{init_env, render_template};
 use crate::util::text::parameterize;
 
 /// Initial site directories and files
 pub fn init(project_name: String) -> Result<Config> {
     println!("Project: `{project_name}` => initialzing ...");
+    let current_dir = current_dir()?;
     let mut config = Config::default();
     config.project = project_name.to_owned();
     let asset_dirs = config.asset_dirs.to_owned();
@@ -30,8 +31,7 @@ pub fn init(project_name: String) -> Result<Config> {
     let content_dirs = config.content_dirs.to_owned();
 
     // Template environment
-    let mut env = init_env();
-    let mut source = Source::new();
+    let mut env = init_env(&current_dir, &project_name)?;
 
     // Build project
     // Directories
@@ -133,36 +133,37 @@ pub fn init(project_name: String) -> Result<Config> {
 
     // Render Files
     // Tailwind config file
-    source.add_template(TAILWIND_CONFIG_FILE, tailwind::CONFIG)?;
-    env.set_source(source.to_owned());
-    let tailwind_tmpl = render_template(
-        &env,
-        TAILWIND_CONFIG_FILE,
-        context!(project => project_name, path_sep => PATH_SEP, output_dir => OUTPUT_DIR),
-    )?;
+    env.add_raw_template(TAILWIND_CONFIG_FILE, tailwind::CONFIG)?;
+    let mut tailwind_ctx = Context::new();
+    tailwind_ctx.insert("project", &project_name);
+    tailwind_ctx.insert("path_sep", &PATH_SEP);
+    tailwind_ctx.insert("output_dir", OUTPUT_DIR);
+    let tailwind_tmpl = render_template(&env, TAILWIND_CONFIG_FILE, &tailwind_ctx)?;
     make_file(
         &format!("{CONFIG_DIR}{PATH_SEP}{TAILWIND_CONFIG_FILE}"),
         &tailwind_tmpl,
     )?;
 
     // Procfile
-    source.add_template(PROC_FILE, proc::PROCFILE)?;
-    env.set_source(source.to_owned());
-    let procfile_tmpl = render_template(
-        &env,
-        PROC_FILE,
-        context!(project => project_name, path_sep => PATH_SEP, output_dir => OUTPUT_DIR, config_dir => CONFIG_DIR, tailwind_config_file => TAILWIND_CONFIG_FILE),
-    )?;
+    env.add_raw_template(PROC_FILE, proc::PROCFILE)?;
+    let mut procfile_ctx = Context::new();
+    procfile_ctx.insert("project", &project_name);
+    procfile_ctx.insert("path_sep", &PATH_SEP);
+    procfile_ctx.insert("output_dir", OUTPUT_DIR);
+    procfile_ctx.insert("config_dir", CONFIG_DIR);
+    procfile_ctx.insert("tailwind_config_file", TAILWIND_CONFIG_FILE);
+    let procfile_tmpl = render_template(&env, PROC_FILE, &procfile_ctx)?;
     make_file(&PROC_FILE.to_owned(), &procfile_tmpl)?;
 
     // Procfile.dev
-    source.add_template(PROC_FILE_DEV, proc::PROCFILE_DEV)?;
-    env.set_source(source.to_owned());
-    let procfile_dev_tmpl = render_template(
-        &env,
-        PROC_FILE_DEV,
-        context!(project => project_name, path_sep => PATH_SEP, output_dir => OUTPUT_DIR, config_dir => CONFIG_DIR, tailwind_config_file => TAILWIND_CONFIG_FILE),
-    )?;
+    env.add_raw_template(PROC_FILE_DEV, proc::PROCFILE_DEV)?;
+    let mut procfile_dev_ctx = Context::new();
+    procfile_dev_ctx.insert("project", &project_name);
+    procfile_dev_ctx.insert("path_sep", &PATH_SEP);
+    procfile_dev_ctx.insert("output_dir", OUTPUT_DIR);
+    procfile_dev_ctx.insert("config_dir", CONFIG_DIR);
+    procfile_dev_ctx.insert("tailwind_config_file", TAILWIND_CONFIG_FILE);
+    let procfile_dev_tmpl = render_template(&env, PROC_FILE_DEV, &procfile_dev_ctx)?;
     make_file(&PROC_FILE_DEV.to_owned(), &procfile_dev_tmpl)?;
 
     println!("Project: `{project_name}` => initialization complete");
@@ -172,32 +173,30 @@ pub fn init(project_name: String) -> Result<Config> {
 
 /// Build site
 pub fn build() -> Result<()> {
-    let config_file = fs::read_to_string(format!("{CONFIG_DIR}{PATH_SEP}{CONFIG_FILE}"))?;
-    let config: Config = serde_json::from_str(config_file.as_str())?;
+    let current_dir = current_dir()?;
+    let config = load_config()?;
     let project_name = config.project.to_owned();
     let output_dir = config.output_dir.to_owned();
-    let data_dir = config.data_dir.to_owned();
     let content_dirs = config.content_dirs.to_owned();
+    let posts = Posts::init(&config)?;
 
     println!("Project: `{project_name}` => building ...");
 
     // Template environment
-    let mut env = init_env();
-    let mut source = Source::new();
-    load_templates(&mut env, &mut source, &config)?;
+    let mut env = init_env(&current_dir, &project_name)?;
 
-    // Site index file
-    let index_template_string =
-        fs::read_to_string(format!("{project_name}{PATH_SEP}{project_name}.jinja"))?;
-    source.add_template(
+    // Project index template file
+    env.add_template_file(
         format!("{project_name}{PATH_SEP}{project_name}.jinja"),
-        index_template_string,
+        None,
     )?;
-    env.set_source(source.to_owned());
+    let mut index_ctx = Context::new();
+    index_ctx.insert("project", &project_name);
+    index_ctx.insert("config", &config);
     let tmpl = render_template(
         &env,
-        format!("{project_name}{PATH_SEP}{project_name}.jinja").as_str(),
-        context!(project => project_name, config => config),
+        &format!("{project_name}{PATH_SEP}{project_name}.jinja"),
+        &index_ctx,
     )?;
     make_file(
         &format!("{project_name}{PATH_SEP}{output_dir}{PATH_SEP}{HTML_INDEX_FILE}"),
@@ -205,15 +204,17 @@ pub fn build() -> Result<()> {
     )?;
 
     for dir in content_dirs {
-        let data_file = fs::read_to_string(format!(
-            "{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{dir}.json"
-        ))?;
-        let posts: Vec<Post> = serde_json::from_str(data_file.as_str())?;
-
+        let dir_posts: Vec<Post> = match posts.by_content.get(&dir) {
+            Some(posts) => posts.to_owned(),
+            None => vec![],
+        };
+        let mut dir_ctx = Context::new();
+        dir_ctx.insert("project", &project_name);
+        dir_ctx.insert("posts", &dir_posts);
         let dir_tmpl = render_template(
             &env,
             &format!("{LAYOUTS_DIR}{PATH_SEP}{dir}.jinja"),
-            context!(project => project_name, posts => posts),
+            &dir_ctx,
         )?;
         make_file(
             &format!(
@@ -222,30 +223,27 @@ pub fn build() -> Result<()> {
             &dir_tmpl,
         )?;
 
-        for post in posts {
+        for post in dir_posts {
             let post_title = parameterize(post.title.to_owned());
             let file_name = format!("{post_title}.jinja");
             make_dirs(
                 &format!("{project_name}{PATH_SEP}{output_dir}{PATH_SEP}{dir}"),
                 vec![post_title.to_owned()],
             )?;
-
-            let template_string = fs::read_to_string(format!(
-                "{project_name}{PATH_SEP}{dir}{PATH_SEP}{file_name}"
-            ))?;
-            source.add_template(format!("{dir}{PATH_SEP}{file_name}"), template_string)?;
-            env.set_source(source.to_owned());
-            let tmpl = render_template(
-                &env,
-                format!("{dir}{PATH_SEP}{file_name}").as_str(),
-                context!(project => project_name, post => post),
+            env.add_template_file(
+                format!("{project_name}{PATH_SEP}{dir}{PATH_SEP}{file_name}"),
+                Some(&format!("{dir}{PATH_SEP}{file_name}")),
             )?;
+
+            let mut post_ctx = Context::new();
+            post_ctx.insert("project", &project_name);
+            post_ctx.insert("post", &post);
+            let tmpl = render_template(&env, &format!("{dir}{PATH_SEP}{file_name}"), &post_ctx)?;
             make_file(
                 &format!("{project_name}{PATH_SEP}{output_dir}{PATH_SEP}{dir}{PATH_SEP}{post_title}{PATH_SEP}{HTML_INDEX_FILE}"),
                 &tmpl,
             )?;
         }
-        println!("Project: `{project_name}` => build complete");
     }
 
     // Move assets
@@ -253,5 +251,7 @@ pub fn build() -> Result<()> {
         format!("{project_name}{PATH_SEP}{ASSETS_DIR}"),
         format!("{project_name}{PATH_SEP}{OUTPUT_DIR}"),
     )?;
+
+    println!("Project: `{project_name}` => build complete");
     Ok(())
 }

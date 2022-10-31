@@ -9,7 +9,7 @@ use crate::model::config::Config;
 use crate::model::post::Post;
 use crate::template::html;
 use crate::util::date_time::date_today;
-use crate::util::text::{capitalize, parameterize, title_case};
+use crate::util::text::{capitalize, parameterize};
 use crate::{core::app, util::file_sys::make_file};
 
 use clap::{Args, Parser, Subcommand};
@@ -101,7 +101,7 @@ pub async fn init() -> Result<()> {
                 ))?;
                 let mut content: Vec<Post> = serde_json::from_str(content_file.as_str())?;
                 let post = Post {
-                    title: title_case(generate_command.title.to_owned()),
+                    title: generate_command.title.to_owned(),
                     published_date: date_today(),
                     description: capitalize(generate_command.description.to_owned()),
                     ..Default::default()
