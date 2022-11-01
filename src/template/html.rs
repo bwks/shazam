@@ -58,21 +58,24 @@ pub const BLOG_LAYOUT: &str = r#"{% extends "layouts/site.jinja" %}
 
 {% block page_content %}
   <div class="">
-    {% for post in posts %}
-      <div class="py-2">
-        <div class="block p-4 rounded-lg shadow-lg bg-white border-2">
-          <a class="text-fuchsia-500 font-semibold text-xl no-underline hover:underline" href="/blog/{{ post.title | slugify }}">{{ post.title | title_case }}</a>
-          <p class="text-gray-400 text-md italic">
-            published: {{ post.published_date }}
-          </p>
-          <p class="text-gray-800 text-lg">
-            {{ post.description }}
-          </p>
-          <div class="">
-            {{ tags::tags(tags=post.tags) }}
+    {% for key, value in posts.by_category %}
+      <h3 class="text-2xl font-semibold">{{ key | title_case }}</h3>
+      {% for post in value %}
+        <div class="py-2">
+          <div class="block p-4 rounded-lg shadow-lg bg-white border-2">
+            <a class="text-fuchsia-500 font-semibold text-xl no-underline hover:underline" href="/blog/{{ post.title | slugify }}">{{ post.title | title_case }}</a>
+            <p class="text-gray-400 text-md italic">
+              published: {{ post.published_date }}
+            </p>
+            <p class="text-gray-800 text-lg">
+              {{ post.description }}
+            </p>
+            <div class="">
+              {{ tags::tags(tags=post.tags) }}
+            </div>
           </div>
         </div>
-      </div>
+      {% endfor %}
     {% endfor %}
   </div>
 {% endblock page_content %}

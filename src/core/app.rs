@@ -193,6 +193,7 @@ pub fn build() -> Result<()> {
     let mut index_ctx = Context::new();
     index_ctx.insert("project", &project_name);
     index_ctx.insert("config", &config);
+    index_ctx.insert("posts", &posts);
     let tmpl = render_template(
         &env,
         &format!("{project_name}{PATH_SEP}{project_name}.jinja"),
@@ -210,7 +211,7 @@ pub fn build() -> Result<()> {
         };
         let mut dir_ctx = Context::new();
         dir_ctx.insert("project", &project_name);
-        dir_ctx.insert("posts", &dir_posts);
+        dir_ctx.insert("posts", &posts);
         let dir_tmpl = render_template(
             &env,
             &format!("{LAYOUTS_DIR}{PATH_SEP}{dir}.jinja"),
