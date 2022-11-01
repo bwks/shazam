@@ -193,6 +193,7 @@ pub fn build() -> Result<()> {
     let mut index_ctx = Context::new();
     index_ctx.insert("project", &project_name);
     index_ctx.insert("config", &config);
+    index_ctx.insert("posts", &posts);
     let tmpl = render_template(
         &env,
         &format!("{project_name}{PATH_SEP}{project_name}.jinja"),
