@@ -43,9 +43,6 @@ pub fn load_templates(env: &mut Tera, config: &Config) -> Result<()> {
             match file {
                 Ok(file_name) => {
                     if file_name.ends_with(".jinja") | file_name.ends_with(".j2") {
-                        // let template_string = fs::read_to_string(format!(
-                        //     "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{dir}{PATH_SEP}{file_name}"
-                        // ))?;
                         env.add_template_file(format!("{dir}{PATH_SEP}{file_name}"), None)?;
                     }
                 }
