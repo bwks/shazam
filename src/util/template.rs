@@ -31,7 +31,7 @@ pub fn render_template(env: &Tera, template_name: &str, kontext: &Context) -> Re
             bail!(format!(
                 " Failed to render: {}\n Error: {}",
                 template_name,
-                e.source().unwrap().to_owned()
+                e.source().unwrap()
             ))
         }
     }
