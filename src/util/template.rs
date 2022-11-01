@@ -1,3 +1,4 @@
+use std::error::Error;
 use std::fs;
 use std::path::MAIN_SEPARATOR as PATH_SEP;
 
@@ -24,8 +25,16 @@ pub fn init_env(current_dir: &String, project: &String) -> Result<Tera> {
 
 /// Render a template
 pub fn render_template(env: &Tera, template_name: &str, kontext: &Context) -> Result<String> {
-    let result = env.render(template_name, kontext)?;
-    Ok(result)
+    match env.render(template_name, kontext) {
+        Ok(r) => Ok(r),
+        Err(e) => {
+            bail!(format!(
+                " Failed to render: {}\n Error: {}",
+                template_name,
+                e.source().unwrap().to_owned()
+            ))
+        }
+    }
 }
 
 /// Load all project templaes into environment
