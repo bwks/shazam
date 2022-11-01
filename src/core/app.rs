@@ -239,6 +239,7 @@ pub fn build() -> Result<()> {
             let mut post_ctx = Context::new();
             post_ctx.insert("project", &project_name);
             post_ctx.insert("post", &post);
+            post_ctx.insert("posts", &posts);
             let tmpl = render_template(&env, &format!("{dir}{PATH_SEP}{file_name}"), &post_ctx)?;
             make_file(
                 &format!("{project_name}{PATH_SEP}{output_dir}{PATH_SEP}{dir}{PATH_SEP}{post_title}{PATH_SEP}{HTML_INDEX_FILE}"),
