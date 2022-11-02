@@ -1,6 +1,7 @@
 use std::path::MAIN_SEPARATOR as PATH_SEP;
 
 use anyhow::Result;
+use serde_yaml;
 use tera::Context;
 
 use crate::core::konst::{
@@ -67,11 +68,11 @@ pub fn init(project_name: String) -> Result<Config> {
     // Config files
     make_file(
         &format!("{CONFIG_DIR}{PATH_SEP}{CONFIG_FILE}"),
-        &serde_json::to_string_pretty(&config)?,
+        &toml::to_string(&config)?,
     )?;
     make_file(
         &format!("{project_name}{PATH_SEP}{DATA_DIR}{PATH_SEP}{BLOG_DATA_FILE}"),
-        &serde_json::to_string_pretty(&vec![blog_post])?,
+        &serde_yaml::to_string(&vec![&blog_post])?,
     )?;
     make_file(
         &format!("{project_name}{PATH_SEP}{ASSETS_DIR}{PATH_SEP}{CSS_DIR}{PATH_SEP}{TAILWIND_INPUT_FILE}"),
