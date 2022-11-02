@@ -34,13 +34,13 @@ pub struct Post {
 pub struct Posts {
     pub categories: Vec<String>,
     pub tags: Vec<String>,
+    pub all: Vec<Post>,
     pub by_content: HashMap<String, Vec<Post>>,
     pub by_category: HashMap<String, Vec<Post>>,
     pub by_tag: HashMap<String, Vec<Post>>,
 }
 
 impl Posts {
-    #[allow(dead_code)]
     pub fn init(config: &Config) -> Result<Self> {
         let mut posts = Self::default();
         let project_name = config.project.to_owned();
@@ -50,6 +50,7 @@ impl Posts {
         // groups
         let mut all_categories = HashSet::new();
         let mut all_tags = HashSet::new();
+        let mut all_posts: Vec<Post> = vec![];
         let mut posts_by_content: HashMap<String, Vec<Post>> = HashMap::new();
         let mut posts_by_category: HashMap<String, Vec<Post>> = HashMap::new();
         let mut posts_by_tag: HashMap<String, Vec<Post>> = HashMap::new();
@@ -62,7 +63,7 @@ impl Posts {
                 .sort_by_key(|x| Reverse(x.published_date.to_owned()));
             for post in data.posts {
                 all_categories.insert(post.category.to_owned());
-
+                all_posts.push(post.to_owned());
                 posts_by_content
                     .entry(dir.to_owned())
                     .or_default()
@@ -80,6 +81,8 @@ impl Posts {
                 }
             }
         }
+        all_posts.sort_by_key(|x| Reverse(x.published_date.to_owned()));
+        posts.all = all_posts;
         posts.by_content = posts_by_content;
         posts.by_category = posts_by_category;
         posts.by_tag = posts_by_tag;

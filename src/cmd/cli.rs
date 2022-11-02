@@ -1,3 +1,4 @@
+use std::cmp::Reverse;
 use std::fs;
 use std::path::MAIN_SEPARATOR as PATH_SEP;
 
@@ -105,6 +106,8 @@ pub async fn init() -> Result<()> {
                     ..Default::default()
                 };
                 data.posts.push(post);
+                data.posts
+                    .sort_by_key(|x| Reverse(x.published_date.to_owned()));
 
                 make_file(
                     &format!("{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{content_type}.toml"),
