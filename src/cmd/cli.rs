@@ -3,12 +3,11 @@ use std::path::MAIN_SEPARATOR as PATH_SEP;
 
 use anyhow::Result;
 
-use crate::core::konst::{CONFIG_DIR, CONFIG_FILE};
 use crate::http;
-use crate::model::config::Config;
 use crate::model::post::Post;
 use crate::template::html;
 use crate::util::date_time::date_today;
+use crate::util::helper::load_config;
 use crate::util::text::{capitalize, parameterize};
 use crate::{core::app, util::file_sys::make_file};
 
@@ -84,8 +83,7 @@ pub async fn init() -> Result<()> {
             Ok(())
         }
         Commands::Generate(generate_command) => {
-            let config_file = fs::read_to_string(&format!("{CONFIG_DIR}{PATH_SEP}{CONFIG_FILE}"))?;
-            let config: Config = serde_json::from_str(config_file.as_str())?;
+            let config = load_config()?;
             let project_name = config.project.to_owned();
             let data_dir = config.data_dir.to_owned();
             let post_title = parameterize(generate_command.title.to_owned());
@@ -97,9 +95,9 @@ pub async fn init() -> Result<()> {
                 .any(|e| generate_command.content_type.eq(e))
             {
                 let content_file = fs::read_to_string(format!(
-                    "{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{content_type}.json"
+                    "{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{content_type}.yaml"
                 ))?;
-                let mut content: Vec<Post> = serde_json::from_str(content_file.as_str())?;
+                let mut content: Vec<Post> = serde_yaml::from_str(content_file.as_str())?;
                 let post = Post {
                     title: generate_command.title.to_owned(),
                     published_date: date_today(),
@@ -109,8 +107,8 @@ pub async fn init() -> Result<()> {
                 content.push(post);
 
                 make_file(
-                    &format!("{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{content_type}.json"),
-                    &serde_json::to_string_pretty(&content)?,
+                    &format!("{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{content_type}.yaml"),
+                    &serde_yaml::to_string(&content)?,
                 )?;
                 make_file(
                     &format!("{project_name}{PATH_SEP}{content_type}{PATH_SEP}{post_title}.jinja"),

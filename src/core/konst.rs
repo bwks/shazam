@@ -1,4 +1,4 @@
-pub const CONFIG_FILE: &str = "config.json";
+pub const CONFIG_FILE: &str = "shazam.config.toml";
 pub const PROC_FILE: &str = "Procfile";
 pub const PROC_FILE_DEV: &str = "Procfile.dev";
 pub const CSS_FRAMEWORK: &str = "tailwind";
@@ -6,7 +6,7 @@ pub const SYNTAX_HIGHLIGHTER: &str = "highlightjs";
 pub const TAILWIND_CONFIG_FILE: &str = "tailwind.config.js";
 pub const TAILWIND_INPUT_FILE: &str = "input.css";
 pub const HTML_INDEX_FILE: &str = "index.html";
-pub const BLOG_DATA_FILE: &str = "blog.json";
+pub const BLOG_DATA_FILE: &str = "blog.yaml";
 pub const CONFIG_DIR: &str = "config";
 pub const DATA_DIR: &str = "data";
 pub const ASSETS_DIR: &str = "assets";

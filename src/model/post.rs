@@ -50,7 +50,8 @@ impl Posts {
         let mut posts_by_tag: HashMap<String, Vec<Post>> = HashMap::new();
 
         for dir in &content_dirs {
-            let filename = format!("{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{dir}.json");
+            // let filename = format!("{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{dir}.json");
+            let filename = format!("{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{dir}.yaml");
             let mut posts = load_data_file(filename)?;
             posts.sort_by_key(|x| Reverse(x.published_date.to_owned()));
             for post in posts {

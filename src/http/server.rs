@@ -1,17 +1,14 @@
 use anyhow::Result;
 use axum::{http::StatusCode, response::IntoResponse, routing::get_service, Router};
 use std::path::MAIN_SEPARATOR as PATH_SEP;
-use std::{fs, io, net::SocketAddr};
+use std::{io, net::SocketAddr};
 use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::core::konst::{CONFIG_DIR, CONFIG_FILE};
-
-use crate::model::config::Config;
+use crate::util::helper::load_config;
 
 pub async fn serve(ipv4_address: String, port: u16) -> Result<()> {
-    let config_file = fs::read_to_string(&format!("{CONFIG_DIR}{PATH_SEP}{CONFIG_FILE}"))?;
-    let config: Config = serde_json::from_str(config_file.as_str())?;
+    let config = load_config()?;
     let project_name = config.project;
     let output_dir = config.output_dir;
 
