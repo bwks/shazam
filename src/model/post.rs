@@ -3,9 +3,11 @@ use std::collections::{HashMap, HashSet};
 use std::path::MAIN_SEPARATOR as PATH_SEP;
 
 use anyhow::Result;
+use chrono::Datelike;
 use serde::{Deserialize, Serialize};
 
 use crate::model::config::Config;
+use crate::util::date_time::to_date;
 use crate::util::helper::load_data_file;
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
@@ -38,6 +40,7 @@ pub struct Posts {
     pub by_content: HashMap<String, Vec<Post>>,
     pub by_category: HashMap<String, Vec<Post>>,
     pub by_tag: HashMap<String, Vec<Post>>,
+    pub by_year: HashMap<i32, Vec<Post>>,
 }
 
 impl Posts {
@@ -54,6 +57,7 @@ impl Posts {
         let mut posts_by_content: HashMap<String, Vec<Post>> = HashMap::new();
         let mut posts_by_category: HashMap<String, Vec<Post>> = HashMap::new();
         let mut posts_by_tag: HashMap<String, Vec<Post>> = HashMap::new();
+        let mut posts_by_year: HashMap<i32, Vec<Post>> = HashMap::new();
 
         for dir in &content_dirs {
             // let filename = format!("{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{dir}.json");
@@ -79,6 +83,10 @@ impl Posts {
                         .or_default()
                         .push(post.to_owned());
                 }
+                posts_by_year
+                    .entry(to_date(post.published_date.to_owned())?.year())
+                    .or_default()
+                    .push(post.to_owned());
             }
         }
         all_posts.sort_by_key(|x| Reverse(x.published_date.to_owned()));
@@ -86,6 +94,7 @@ impl Posts {
         posts.by_content = posts_by_content;
         posts.by_category = posts_by_category;
         posts.by_tag = posts_by_tag;
+        posts.by_year = posts_by_year;
         posts.categories = to_string_vec(all_categories);
         posts.tags = to_string_vec(all_tags);
 

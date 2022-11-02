@@ -1,4 +1,4 @@
-// use anyhow::Result;
+use anyhow::Result as AnyhowResult;
 use chrono::{DateTime, Datelike, Local, NaiveDate};
 use std::collections::HashMap;
 use tera::{to_value, try_get_value, Result, Value};
@@ -7,6 +7,12 @@ use tera::{to_value, try_get_value, Result, Value};
 pub fn date_today() -> String {
     let dt: DateTime<Local> = Local::now();
     dt.format("%Y-%m-%d").to_string()
+}
+
+/// Parse the a date string in the (yyyy-mm-dd) into a naive date.
+pub fn to_date(date_string: String) -> AnyhowResult<NaiveDate> {
+    let date = NaiveDate::parse_from_str(date_string.as_str(), "%Y-%m-%d")?;
+    Ok(date)
 }
 
 /// Get a human readable date from a date string
