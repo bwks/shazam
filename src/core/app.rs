@@ -1,8 +1,8 @@
 use std::path::MAIN_SEPARATOR as PATH_SEP;
 
 use anyhow::Result;
-use serde_yaml;
 use tera::Context;
+use toml;
 
 use crate::core::konst::{
     ASSETS_DIR, BLOG_DATA_FILE, BLOG_DIR, CONFIG_DIR, CONFIG_FILE, CSS_DIR, DATA_DIR,
@@ -10,7 +10,7 @@ use crate::core::konst::{
     TAILWIND_CONFIG_FILE, TAILWIND_INPUT_FILE, TEMPLATES_DIR,
 };
 use crate::model::config::Config;
-use crate::model::post::{Post, Posts};
+use crate::model::post::{Data, Post, Posts};
 use crate::string_vec;
 use crate::template::html;
 use crate::template::proc;
@@ -64,6 +64,10 @@ pub fn init(project_name: String) -> Result<Config> {
         ..Default::default()
     };
 
+    let data = Data {
+        posts: vec![blog_post],
+    };
+
     // Files
     // Config files
     make_file(
@@ -72,7 +76,7 @@ pub fn init(project_name: String) -> Result<Config> {
     )?;
     make_file(
         &format!("{project_name}{PATH_SEP}{DATA_DIR}{PATH_SEP}{BLOG_DATA_FILE}"),
-        &serde_yaml::to_string(&vec![&blog_post])?,
+        &toml::to_string(&data)?,
     )?;
     make_file(
         &format!("{project_name}{PATH_SEP}{ASSETS_DIR}{PATH_SEP}{CSS_DIR}{PATH_SEP}{TAILWIND_INPUT_FILE}"),

@@ -9,6 +9,11 @@ use crate::model::config::Config;
 use crate::util::helper::load_data_file;
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
+pub struct Data {
+    pub posts: Vec<Post>,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct Post {
     pub author: String,
     pub author_email: String,
@@ -51,10 +56,11 @@ impl Posts {
 
         for dir in &content_dirs {
             // let filename = format!("{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{dir}.json");
-            let filename = format!("{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{dir}.yaml");
-            let mut posts = load_data_file(filename)?;
-            posts.sort_by_key(|x| Reverse(x.published_date.to_owned()));
-            for post in posts {
+            let filename = format!("{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{dir}.toml");
+            let mut data = load_data_file(filename)?;
+            data.posts
+                .sort_by_key(|x| Reverse(x.published_date.to_owned()));
+            for post in data.posts {
                 all_categories.insert(post.category.to_owned());
 
                 posts_by_content

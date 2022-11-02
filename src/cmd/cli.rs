@@ -4,7 +4,7 @@ use std::path::MAIN_SEPARATOR as PATH_SEP;
 use anyhow::Result;
 
 use crate::http;
-use crate::model::post::Post;
+use crate::model::post::{Data, Post};
 use crate::template::html;
 use crate::util::date_time::date_today;
 use crate::util::helper::load_config;
@@ -95,20 +95,20 @@ pub async fn init() -> Result<()> {
                 .any(|e| generate_command.content_type.eq(e))
             {
                 let content_file = fs::read_to_string(format!(
-                    "{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{content_type}.yaml"
+                    "{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{content_type}.toml"
                 ))?;
-                let mut content: Vec<Post> = serde_yaml::from_str(content_file.as_str())?;
+                let mut data: Data = toml::from_str(content_file.as_str())?;
                 let post = Post {
                     title: generate_command.title.to_owned(),
                     published_date: date_today(),
                     description: capitalize(generate_command.description.to_owned()),
                     ..Default::default()
                 };
-                content.push(post);
+                data.posts.push(post);
 
                 make_file(
-                    &format!("{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{content_type}.yaml"),
-                    &serde_yaml::to_string(&content)?,
+                    &format!("{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{content_type}.toml"),
+                    &toml::to_string(&data)?,
                 )?;
                 make_file(
                     &format!("{project_name}{PATH_SEP}{content_type}{PATH_SEP}{post_title}.jinja"),
