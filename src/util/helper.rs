@@ -5,7 +5,7 @@ use anyhow::Result;
 
 use crate::core::konst::{CONFIG_DIR, CONFIG_FILE};
 use crate::model::config::Config;
-use crate::model::post::Post;
+use crate::model::post::Data;
 
 #[allow(dead_code)]
 pub fn load_config() -> Result<Config> {
@@ -15,8 +15,8 @@ pub fn load_config() -> Result<Config> {
 }
 
 #[allow(dead_code)]
-pub fn load_data_file(filename: String) -> Result<Vec<Post>> {
+pub fn load_data_file(filename: String) -> Result<Data> {
     let data_file = fs::read_to_string(filename)?;
-    let posts: Vec<Post> = serde_yaml::from_str(data_file.as_str())?;
+    let posts: Data = toml::from_str(data_file.as_str())?;
     Ok(posts)
 }

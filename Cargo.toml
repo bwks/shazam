@@ -1,6 +1,6 @@
 [package]
 name = "shazam"
-version = "0.1.7"
+version = "0.1.8"
 edition = "2021"
 authors = ["Bradley Searle"]
 license = "MIT"
@@ -12,7 +12,6 @@ axum-extra = { version = "0.3.7", features = ["spa"] }
 clap = { version = "4.0.10", features = ["derive"] }
 chrono = "0.4.22"
 serde = { version = "1.0.145", features = ["derive"] }
-serde_yaml = "0.9.14"
 tera = { version = "1.17.1", features = ["builtins"] }
 titlecase = "2.2.1"
 tokio = { version = "1.0", features = ["full"] }
