@@ -94,12 +94,9 @@ impl Posts {
                                 .or_default()
                                 .push(post.to_owned());
                         }
-                    },
-                    false => {
-                        draft_posts.push(post)
-                    },
+                    }
+                    false => draft_posts.push(post),
                 }
-
             }
         }
         all_posts.sort_by_key(|x| Reverse(x.published_date.to_owned()));
