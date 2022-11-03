@@ -12,7 +12,7 @@ pub fn date_today() -> String {
 /// Parse the a date string in the (yyyy-mm-dd) into a naive date.
 pub fn to_date(date_string: String) -> AnyhowResult<NaiveDate> {
     let date = NaiveDate::parse_from_str(date_string.as_str(), "%Y-%m-%d")
-        .unwrap_or_else(|_| NaiveDate::from_ymd(1970, 1, 1));
+        .unwrap_or_else(|_| NaiveDate::from_ymd(0, 1, 1));
     Ok(date)
 }
 
@@ -22,7 +22,7 @@ pub fn to_date(date_string: String) -> AnyhowResult<NaiveDate> {
 pub fn human_date(date_string: &Value, _: &HashMap<String, Value>) -> Result<Value> {
     let s = try_get_value!("human_date", "date_string", String, date_string);
     let date = NaiveDate::parse_from_str(s.as_str(), "%Y-%m-%d")
-        .unwrap_or_else(|_| NaiveDate::from_ymd(1970, 1, 1));
+        .unwrap_or_else(|_| NaiveDate::from_ymd(0, 1, 1));
     let day_suffix = match date.day() {
         1 | 21 | 31 => "st",
         2 | 22 => "nd",
@@ -70,7 +70,7 @@ mod tests {
             ),
             (
                 "".to_owned(),
-                NaiveDate::parse_from_str("1970-01-01", "%Y-%m-%d").unwrap(),
+                NaiveDate::parse_from_str("0-01-01", "%Y-%m-%d").unwrap(),
             ),
         ];
         for t in test_cases {
