@@ -34,9 +34,11 @@ pub struct Post {
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Posts {
+    pub all: Vec<Post>,
+    pub draft: Vec<Post>,
     pub categories: Vec<String>,
     pub tags: Vec<String>,
-    pub all: Vec<Post>,
+    pub years: Vec<i32>,
     pub by_content: HashMap<String, Vec<Post>>,
     pub by_category: HashMap<String, Vec<Post>>,
     pub by_tag: HashMap<String, Vec<Post>>,
@@ -53,56 +55,65 @@ impl Posts {
         // groups
         let mut all_categories = HashSet::new();
         let mut all_tags = HashSet::new();
+        let mut all_years = HashSet::new();
         let mut all_posts: Vec<Post> = vec![];
+        let mut draft_posts: Vec<Post> = vec![];
         let mut posts_by_content: HashMap<String, Vec<Post>> = HashMap::new();
         let mut posts_by_category: HashMap<String, Vec<Post>> = HashMap::new();
         let mut posts_by_tag: HashMap<String, Vec<Post>> = HashMap::new();
         let mut posts_by_year: HashMap<i32, Vec<Post>> = HashMap::new();
 
         for dir in &content_dirs {
-            // let filename = format!("{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{dir}.json");
             let filename = format!("{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{dir}.toml");
             let mut data = load_data_file(filename)?;
             data.posts
                 .sort_by_key(|x| Reverse(x.published_date.to_owned()));
+
             for post in data.posts {
-                all_categories.insert(post.category.to_owned());
-                all_posts.push(post.to_owned());
-                posts_by_content
-                    .entry(dir.to_owned())
-                    .or_default()
-                    .push(post.to_owned());
-                posts_by_category
-                    .entry(post.category.to_owned())
-                    .or_default()
-                    .push(post.to_owned());
-                for tag in &post.tags {
-                    all_tags.insert(tag.to_owned());
-                    posts_by_tag
-                        .entry(tag.to_owned())
-                        .or_default()
-                        .push(post.to_owned());
+                match post.publish {
+                    true => {
+                        all_categories.insert(post.category.to_owned());
+                        all_years.insert(to_date(post.published_date.to_owned())?.year());
+                        all_posts.push(post.to_owned());
+                        posts_by_content
+                            .entry(dir.to_owned())
+                            .or_default()
+                            .push(post.to_owned());
+                        posts_by_category
+                            .entry(post.category.to_owned())
+                            .or_default()
+                            .push(post.to_owned());
+                        posts_by_year
+                            .entry(to_date(post.published_date.to_owned())?.year())
+                            .or_default()
+                            .push(post.to_owned());
+                        for tag in &post.tags {
+                            all_tags.insert(tag.to_owned());
+                            posts_by_tag
+                                .entry(tag.to_owned())
+                                .or_default()
+                                .push(post.to_owned());
+                        }
+                    }
+                    false => draft_posts.push(post),
                 }
-                posts_by_year
-                    .entry(to_date(post.published_date.to_owned())?.year())
-                    .or_default()
-                    .push(post.to_owned());
             }
         }
         all_posts.sort_by_key(|x| Reverse(x.published_date.to_owned()));
         posts.all = all_posts;
+        posts.draft = draft_posts;
         posts.by_content = posts_by_content;
         posts.by_category = posts_by_category;
         posts.by_tag = posts_by_tag;
         posts.by_year = posts_by_year;
         posts.categories = to_string_vec(all_categories);
         posts.tags = to_string_vec(all_tags);
+        posts.years = all_years.into_iter().collect();
 
         Ok(posts)
     }
 }
 
-#[allow(dead_code)]
 fn to_string_vec(hash_set: HashSet<String>) -> Vec<String> {
     let mut result = hash_set.into_iter().collect::<Vec<String>>();
     result.sort_by_key(|x| x.to_lowercase());
