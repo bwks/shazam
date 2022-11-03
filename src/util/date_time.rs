@@ -11,7 +11,8 @@ pub fn date_today() -> String {
 
 /// Parse the a date string in the (yyyy-mm-dd) into a naive date.
 pub fn to_date(date_string: String) -> AnyhowResult<NaiveDate> {
-    let date = NaiveDate::parse_from_str(date_string.as_str(), "%Y-%m-%d")?;
+    let date = NaiveDate::parse_from_str(date_string.as_str(), "%Y-%m-%d")
+        .unwrap_or_else(|_| NaiveDate::from_ymd(1970, 1, 1));
     Ok(date)
 }
 
@@ -40,21 +41,41 @@ pub fn human_date(date_string: &Value, _: &HashMap<String, Value>) -> Result<Val
     Ok(to_value(result)?)
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use crate::util::date_time::human_date;
+#[cfg(test)]
+mod tests {
+    use chrono::NaiveDate;
 
-//     #[test]
-//     fn returns_date_as_humananize_string() {
-//         let test_cases = vec![
-//             ("2022-10-01".to_owned(), "1st of October 2022".to_owned()),
-//             ("2022-10-22".to_owned(), "22nd of October 2022".to_owned()),
-//             ("2022-10-03".to_owned(), "3rd of October 2022".to_owned()),
-//             ("2022-10-30".to_owned(), "30th of October 2022".to_owned()),
-//         ];
-//         for t in test_cases {
-//             let result = human_date(t.0);
-//             assert_eq!(result, t.1);
-//         }
-//     }
-// }
+    use crate::util::date_time::to_date;
+
+    // #[test]
+    // fn returns_date_as_humananize_string() {
+    //     let test_cases = vec![
+    //         ("2022-10-01".to_owned(), "1st of October 2022".to_owned()),
+    //         ("2022-10-22".to_owned(), "22nd of October 2022".to_owned()),
+    //         ("2022-10-03".to_owned(), "3rd of October 2022".to_owned()),
+    //         ("2022-10-30".to_owned(), "30th of October 2022".to_owned()),
+    //     ];
+    //     for t in test_cases {
+    //         let result = human_date(t.0);
+    //         assert_eq!(result, t.1);
+    //     }
+    // }
+
+    #[test]
+    fn returns_naieve_date_from_date_string() {
+        let test_cases = vec![
+            (
+                "2022-10-01".to_owned(),
+                NaiveDate::parse_from_str("2022-10-01", "%Y-%m-%d").unwrap(),
+            ),
+            (
+                "".to_owned(),
+                NaiveDate::parse_from_str("1970-01-01", "%Y-%m-%d").unwrap(),
+            ),
+        ];
+        for t in test_cases {
+            let result = to_date(t.0).unwrap();
+            assert_eq!(result, t.1);
+        }
+    }
+}
