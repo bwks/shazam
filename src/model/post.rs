@@ -70,36 +70,35 @@ impl Posts {
                 .sort_by_key(|x| Reverse(x.published_date.to_owned()));
 
             for post in data.posts {
-                match post.publish {
-                    true => {
-                        all_categories.insert(post.category.to_owned());
-                        all_years.insert(to_date(post.published_date.to_owned())?.year());
-                        all_posts.push(post.to_owned());
-                        posts_by_content
-                            .entry(dir.to_owned())
-                            .or_default()
-                            .push(post.to_owned());
-                        posts_by_category
-                            .entry(post.category.to_owned())
-                            .or_default()
-                            .push(post.to_owned());
-                        posts_by_year
-                            .entry(to_date(post.published_date.to_owned())?.year())
-                            .or_default()
-                            .push(post.to_owned());
-                        for tag in &post.tags {
-                            all_tags.insert(tag.to_owned());
-                            posts_by_tag
-                                .entry(tag.to_owned())
-                                .or_default()
-                                .push(post.to_owned());
-                        }
-                    }
-                    false => draft_posts.push(post),
+                all_categories.insert(post.category.to_owned());
+                all_years.insert(to_date(post.published_date.to_owned())?.year());
+                all_posts.push(post.to_owned());
+                if !post.publish {
+                    draft_posts.push(post.to_owned());
+                }
+                posts_by_content
+                    .entry(dir.to_owned())
+                    .or_default()
+                    .push(post.to_owned());
+                posts_by_category
+                    .entry(post.category.to_owned())
+                    .or_default()
+                    .push(post.to_owned());
+                posts_by_year
+                    .entry(to_date(post.published_date.to_owned())?.year())
+                    .or_default()
+                    .push(post.to_owned());
+                for tag in &post.tags {
+                    all_tags.insert(tag.to_owned());
+                    posts_by_tag
+                        .entry(tag.to_owned())
+                        .or_default()
+                        .push(post.to_owned());
                 }
             }
         }
         all_posts.sort_by_key(|x| Reverse(x.published_date.to_owned()));
+        draft_posts.sort_by_key(|x| Reverse(x.published_date.to_owned()));
         posts.all = all_posts;
         posts.draft = draft_posts;
         posts.by_content = posts_by_content;
