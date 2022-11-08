@@ -1,5 +1,6 @@
 use std::cmp::Reverse;
 use std::collections::{HashMap, HashSet};
+use std::fmt::{Display, Formatter};
 use std::path::MAIN_SEPARATOR as PATH_SEP;
 
 use anyhow::Result;
@@ -7,15 +8,36 @@ use chrono::Datelike;
 use serde::{Deserialize, Serialize};
 
 use crate::model::config::Config;
-use crate::util::date_time::to_date;
+use crate::util::date_time::{date_today, to_date};
 use crate::util::helper::load_data_file;
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum FileType {
+    HTML,
+    JINJA,
+    JSON,
+    MD,
+    XML,
+}
+impl Display for FileType {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        match self {
+            FileType::HTML => write!(f, "html"),
+            FileType::JINJA => write!(f, "jinja"),
+            FileType::JSON => write!(f, "json"),
+            FileType::MD => write!(f, "md"),
+            FileType::XML => write!(f, "xml"),
+        }
+    }
+}
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct Data {
     pub posts: Vec<Post>,
 }
 
-#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Post {
     pub author: String,
     pub author_email: String,
@@ -25,11 +47,33 @@ pub struct Post {
     pub description: String,
     pub category: String,
     pub publish: bool,
+    pub file_type: FileType,
     pub tags: Vec<String>,
     pub references: Vec<String>,
     pub bibliography: Vec<String>,
     pub table_of_contents: Vec<String>,
     pub links: Vec<String>,
+}
+
+impl Post {
+    pub fn default() -> Post {
+        Post {
+            author: "".to_owned(),
+            author_email: "".to_owned(),
+            published_date: date_today(),
+            updated_date: "".to_owned(),
+            title: "".to_owned(),
+            description: "".to_owned(),
+            category: "uncategorised".to_owned(),
+            publish: false,
+            file_type: FileType::HTML,
+            tags: vec![],
+            references: vec![],
+            bibliography: vec![],
+            table_of_contents: vec![],
+            links: vec![],
+        }
+    }
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]

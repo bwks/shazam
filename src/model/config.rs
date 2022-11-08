@@ -9,6 +9,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
     pub project: String,
+    pub owner: String,
+    pub owner_email: String,
     pub css: String,
     pub code_block: String,
     pub config_dir: String,
@@ -19,9 +21,11 @@ pub struct Config {
     pub content_dirs: Vec<String>,
 }
 impl Config {
-    pub fn default() -> Self {
+    pub fn init(project: String, owner: String, owner_email: String) -> Self {
         Self {
-            project: "".to_owned(),
+            project: project,
+            owner: owner,
+            owner_email: owner_email,
             css: CSS_FRAMEWORK.to_owned(),
             code_block: SYNTAX_HIGHLIGHTER.to_owned(),
             config_dir: CONFIG_DIR.to_owned(),
