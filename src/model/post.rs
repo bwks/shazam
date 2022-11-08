@@ -14,20 +14,20 @@ use crate::util::helper::load_data_file;
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum FileType {
-    HTML,
-    JINJA,
-    JSON,
-    MD,
-    XML,
+    Html,
+    Jinja,
+    Json,
+    Md,
+    Xml,
 }
 impl Display for FileType {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         match self {
-            FileType::HTML => write!(f, "html"),
-            FileType::JINJA => write!(f, "jinja"),
-            FileType::JSON => write!(f, "json"),
-            FileType::MD => write!(f, "md"),
-            FileType::XML => write!(f, "xml"),
+            FileType::Html => write!(f, "html"),
+            FileType::Jinja => write!(f, "jinja"),
+            FileType::Json => write!(f, "json"),
+            FileType::Md => write!(f, "md"),
+            FileType::Xml => write!(f, "xml"),
         }
     }
 }
@@ -66,7 +66,7 @@ impl Post {
             description: "".to_owned(),
             category: "uncategorised".to_owned(),
             publish: false,
-            file_type: FileType::HTML,
+            file_type: FileType::Html,
             tags: vec![],
             references: vec![],
             bibliography: vec![],

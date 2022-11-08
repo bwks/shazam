@@ -23,9 +23,9 @@ pub struct Config {
 impl Config {
     pub fn init(project: String, owner: String, owner_email: String) -> Self {
         Self {
-            project: project,
-            owner: owner,
-            owner_email: owner_email,
+            project,
+            owner,
+            owner_email,
             css: CSS_FRAMEWORK.to_owned(),
             code_block: SYNTAX_HIGHLIGHTER.to_owned(),
             config_dir: CONFIG_DIR.to_owned(),

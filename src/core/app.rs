@@ -30,7 +30,7 @@ pub fn init(project: String, owner: String, owner_email: String) -> Result<Confi
     let asset_dirs = config.asset_dirs.to_owned();
     let template_dirs = config.template_dirs.to_owned();
     let content_dirs = config.content_dirs.to_owned();
-    let jinja_file = FileType::JINJA;
+    let jinja_file = FileType::Jinja;
 
     // Template environment
     let mut env = init_env(&current_dir, &project_name)?;
@@ -76,7 +76,7 @@ pub fn init(project: String, owner: String, owner_email: String) -> Result<Confi
         title: "feed".to_owned(),
         description: format!("{project_name} RSS Feed"),
         published_date: date_today(),
-        file_type: FileType::XML,
+        file_type: FileType::Xml,
         ..Post::default()
     };
 
@@ -206,7 +206,7 @@ pub fn build() -> Result<()> {
     let output_dir = config.output_dir.to_owned();
     let content_dirs = config.content_dirs.to_owned();
     let posts = Posts::init(&config)?;
-    let jinja_file = FileType::JINJA;
+    let jinja_file = FileType::Jinja;
 
     println!("Project: `{project_name}` => building ...");
 
@@ -255,27 +255,24 @@ pub fn build() -> Result<()> {
             let post_title = parameterize(post.title.to_owned());
             let file_name = format!("{post_title}.{jinja_file}");
             let (file_type, file_path) = match post.file_type {
-                FileType::HTML => (
+                FileType::Html => (
                     HTML_INDEX_FILE,
                     format!(
                         "{project_name}{PATH_SEP}{output_dir}{PATH_SEP}{dir}{PATH_SEP}{post_title}"
                     ),
                 ),
-                FileType::XML => (
+                FileType::Xml => (
                     RSS_FEED_FILE,
                     format!("{project_name}{PATH_SEP}{output_dir}{PATH_SEP}{dir}"),
                 ),
                 _ => bail!("unsupported file type"),
             };
             // Only make directories for HTML files.
-            match post.file_type {
-                FileType::HTML => {
-                    make_dirs(
-                        &format!("{project_name}{PATH_SEP}{output_dir}{PATH_SEP}{dir}"),
-                        vec![post_title.to_owned()],
-                    )?;
-                }
-                _ => (),
+            if post.file_type == FileType::Html {
+                make_dirs(
+                    &format!("{project_name}{PATH_SEP}{output_dir}{PATH_SEP}{dir}"),
+                    vec![post_title.to_owned()],
+                )?;
             }
 
             let mut post_ctx = Context::new();
