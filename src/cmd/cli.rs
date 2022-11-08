@@ -4,6 +4,7 @@ use std::path::MAIN_SEPARATOR as PATH_SEP;
 
 use anyhow::Result;
 
+use crate::core::konst::TEMPLATES_DIR;
 use crate::http;
 use crate::model::post::{Data, Post};
 use crate::template::html;
@@ -39,7 +40,14 @@ pub enum Commands {
 #[derive(Args, Debug)]
 pub struct InitCmd {
     /// Name of the project
+    #[clap(long)]
     pub name: String,
+    /// Name of the the project owner
+    #[clap(long)]
+    pub owner: String,
+    /// Email of the project owner
+    #[clap(long)]
+    pub owner_email: String,
 }
 
 #[derive(Args, Debug)]
@@ -72,7 +80,11 @@ pub async fn init() -> Result<()> {
     let cli = Cli::parse();
     match &cli.command {
         Commands::Init(init_command) => {
-            app::init(init_command.name.to_owned())?;
+            app::init(
+                init_command.name.to_owned(),
+                init_command.owner.to_owned(),
+                init_command.owner_email.to_owned(),
+            )?;
             Ok(())
         }
         Commands::Serve(serve_command) => {
@@ -103,7 +115,7 @@ pub async fn init() -> Result<()> {
                     title: generate_command.title.to_owned(),
                     published_date: date_today(),
                     description: capitalize(generate_command.description.to_owned()),
-                    ..Default::default()
+                    ..Post::default()
                 };
                 data.posts.push(post);
                 data.posts
@@ -114,7 +126,7 @@ pub async fn init() -> Result<()> {
                     &toml::to_string(&data)?,
                 )?;
                 make_file(
-                    &format!("{project_name}{PATH_SEP}{content_type}{PATH_SEP}{post_title}.jinja"),
+                    &format!("{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{content_type}{PATH_SEP}{post_title}.jinja"),
                     &html::BLOG_POST_TEMPLATE.to_owned(),
                 )?;
                 Ok(())

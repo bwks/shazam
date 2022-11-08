@@ -1,6 +1,6 @@
-pub const SITE_LAYOUT: &str = r#"{% import "macros/page-header.jinja" as page_header %}
-{% import "macros/link-to.jinja" as link_to %}
-{% import "macros/tags.jinja" as tags %}
+pub const SITE_LAYOUT: &str = r#"{% import "_macros/page-header.jinja" as page_header %}
+{% import "_macros/link-to.jinja" as link_to %}
+{% import "_macros/tags.jinja" as tags %}
 <!DOCTYPE html>
 <html lang="en" class="h-full">
   <head>
@@ -19,12 +19,12 @@ pub const SITE_LAYOUT: &str = r#"{% import "macros/page-header.jinja" as page_he
     <!-- Initialize highlight.js -->
     <script>hljs.highlightAll();</script>
 
-    <title>{{ project }}</title>
+    <title>{{ config.project }}</title>
   </head>
 
   <body class="antiailiased grid place-items-center">
     {% block page_header %}
-      {{ page_header::page_header(heading=project) }}
+      {{ page_header::page_header(heading=config.project) }}
     {% endblock page_header %}
 
     <div class="w-3/4 px-10">
@@ -39,14 +39,14 @@ pub const SITE_LAYOUT: &str = r#"{% import "macros/page-header.jinja" as page_he
   <footer>
     <div class="text-lg text-indigo-500">
       {% block page_footer %}
-        {% include "includes/footer.jinja" %}
+        {% include "_includes/footer.jinja" %}
       {% endblock page_footer %}
     </div>
   </footer>
 </html>
 "#;
 
-pub const BLOG_LAYOUT: &str = r#"{% extends "layouts/site.jinja" %}
+pub const BLOG_LAYOUT: &str = r#"{% extends "_layouts/site.jinja" %}
 
 {% block page_header %}
   {% if post %}
@@ -59,22 +59,23 @@ pub const BLOG_LAYOUT: &str = r#"{% extends "layouts/site.jinja" %}
 {% block page_content %}
   <div class="">
     {% for key, value in posts.by_category %}
-      <h3 class="text-2xl font-semibold">{{ key | title_case }}</h3>
       {% for post in value %}
-        <div class="py-2">
-          <div class="block p-4 rounded-lg shadow-lg bg-white border-2">
-            <a class="text-fuchsia-500 font-semibold text-xl no-underline hover:underline" href="/blog/{{ post.title | slugify }}">{{ post.title | title_case }}</a>
-            <p class="text-gray-400 text-md italic">
-              published: {{ post.published_date }}
-            </p>
-            <p class="text-gray-800 text-lg">
-              {{ post.description }}
-            </p>
-            <div class="">
-              {{ tags::tags(tags=post.tags) }}
+        {% if post.publish %}
+          <div class="py-2">
+            <div class="block p-4 rounded-lg shadow-lg bg-white border-2">
+              <a class="text-fuchsia-500 font-semibold text-xl no-underline hover:underline" href="/blog/{{ post.title | slugify }}">{{ post.title | title_case }}</a>
+              <p class="text-gray-400 text-md italic">
+                published: {{ post.published_date }}
+              </p>
+              <p class="text-gray-800 text-lg">
+                {{ post.description }}
+              </p>
+              <div class="">
+                {{ tags::tags(tags=post.tags) }}
+              </div>
             </div>
           </div>
-        </div>
+        {% endif %}
       {% endfor %}
     {% endfor %}
   </div>
@@ -129,10 +130,10 @@ pub const TAGS_MACRO: &str = r#"{% macro tags(tags) %}
 {% endmacro %}
 "#;
 
-pub const SITE_INDEX_TEMPLATE: &str = r#"{% extends "layouts/site.jinja" %}
+pub const SITE_INDEX_TEMPLATE: &str = r#"{% extends "_layouts/site.jinja" %}
 {% block page_content %}
   <div class="grid place-items-center">
-    <h3 class="font-medium text-2xl">Super Awesome Post Categories</h3>
+    <h3 class="font-medium text-2xl">Super Awesome Content</h3>
   </div>
   {% for content in config.content_dirs %}
     <div class="py-2">
@@ -144,10 +145,10 @@ pub const SITE_INDEX_TEMPLATE: &str = r#"{% extends "layouts/site.jinja" %}
 {% endblock page_content %}
 "#;
 
-pub const BLOG_POST_TEMPLATE: &str = r#"{% extends "layouts/blog.jinja" %}
+pub const BLOG_POST_TEMPLATE: &str = r#"{% extends "_layouts/blog.jinja" %}
 {% block page_content %}
   <div class="px-5 text-lg text-gray-800">
-    {% include "includes/lorem-ipsum.jinja" %}
+    {% include "_includes/lorem-ipsum.jinja" %}
   </div>
   <div class="px-5 py-3">
     <pre><code class="language-rust hljs">
