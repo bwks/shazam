@@ -1,3 +1,5 @@
+use regex::Regex;
+use std::collections::HashMap;
 use std::path::MAIN_SEPARATOR as PATH_SEP;
 
 use anyhow::{bail, Result};
@@ -205,7 +207,7 @@ pub fn build() -> Result<()> {
     let project_name = config.project.to_owned();
     let output_dir = config.output_dir.to_owned();
     let content_dirs = config.content_dirs.to_owned();
-    let posts = Posts::init(&config)?;
+    let mut posts = Posts::init(&config)?;
     let jinja_file = FileType::Jinja;
 
     println!("Project: `{project_name}` => building ...");
@@ -251,7 +253,28 @@ pub fn build() -> Result<()> {
             &dir_tmpl,
         )?;
 
-        for post in dir_posts {
+        // Get the rendered body content from posts
+        let re = Regex::new(r"^[\s\S]*<body[^>]*>([\s\S]*)</body>[\s\S]*$")?;
+        let mut body_content: HashMap<String, String> = HashMap::new();
+        for post in &dir_posts {
+            let post_title = parameterize(post.title.to_owned());
+            let file_name = format!("{post_title}.{jinja_file}");
+
+            let mut post_ctx = Context::new();
+            post_ctx.insert("config", &config);
+            post_ctx.insert("post", &post);
+            post_ctx.insert("posts", &posts);
+            let tmpl = render_template(&env, &format!("{dir}{PATH_SEP}{file_name}"), &post_ctx)?;
+
+            let content = match re.captures(&tmpl) {
+                Some(s) => s[1].to_string(),
+                None => "".to_string(),
+            };
+            body_content.insert(post_title.to_owned(), content.to_owned());
+        }
+        posts.content = body_content;
+
+        for post in &dir_posts {
             let post_title = parameterize(post.title.to_owned());
             let file_name = format!("{post_title}.{jinja_file}");
             let (file_type, file_path) = match post.file_type {
