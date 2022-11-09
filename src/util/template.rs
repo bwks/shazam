@@ -22,8 +22,7 @@ pub fn render_template(env: &Tera, template_name: &str, kontext: &Context) -> Re
         Err(e) => {
             bail!(format!(
                 " Failed to render: {}\n Error: {}",
-                template_name,
-                e
+                template_name, e
             ))
         }
     }
