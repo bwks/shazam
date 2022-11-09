@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::fs;
 use std::path::MAIN_SEPARATOR as PATH_SEP;
 
@@ -8,13 +7,6 @@ use tera::{Context, Tera};
 use crate::core::konst::TEMPLATES_DIR;
 use crate::model::config::Config;
 use crate::util::{date_time, text};
-
-/// Truncate a string to the desired length
-// pub fn truncate(string: String, length: usize) -> String {
-//     let mut str_vec: Vec<&str> = string.split_whitespace().collect();
-//     str_vec.truncate(length);
-//     str_vec.join(" ")
-// }
 
 pub fn init_env(current_dir: &String, project: &String) -> Result<Tera> {
     let mut env = Tera::new(&format!("{current_dir}/{project}/templates/**/*.jinja"))?;
@@ -30,8 +22,7 @@ pub fn render_template(env: &Tera, template_name: &str, kontext: &Context) -> Re
         Err(e) => {
             bail!(format!(
                 " Failed to render: {}\n Error: {}",
-                template_name,
-                e.source().unwrap()
+                template_name, e
             ))
         }
     }

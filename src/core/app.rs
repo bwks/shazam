@@ -207,6 +207,7 @@ pub fn build() -> Result<()> {
     let project_name = config.project.to_owned();
     let output_dir = config.output_dir.to_owned();
     let content_dirs = config.content_dirs.to_owned();
+    let data_dir = config.data_dir.to_owned();
     let mut posts = Posts::init(&config)?;
     let jinja_file = FileType::Jinja;
 
@@ -234,10 +235,27 @@ pub fn build() -> Result<()> {
     )?;
 
     for dir in content_dirs {
-        let dir_posts: Vec<Post> = match posts.by_content.get(&dir) {
+        let mut dir_posts: Vec<Post> = match posts.by_content.get(&dir) {
             Some(posts) => posts.to_owned(),
             None => vec![],
         };
+        for mut post in dir_posts.iter_mut() {
+            if post.author.is_empty() {
+                post.author = config.owner.to_owned()
+            }
+            if post.author_email.is_empty() {
+                post.author_email = config.owner_email.to_owned()
+            }
+        }
+        let mut clean_posts: HashMap<String, Vec<Post>> = HashMap::new();
+
+        clean_posts.insert("posts".to_owned(), dir_posts.to_owned());
+
+        make_file(
+            &format!("{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{dir}.toml"),
+            &toml::to_string(&clean_posts)?,
+        )?;
+
         let mut dir_ctx = Context::new();
         dir_ctx.insert("config", &config);
         dir_ctx.insert("posts", &posts);
