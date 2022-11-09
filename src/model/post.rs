@@ -20,6 +20,11 @@ pub enum FileType {
     Md,
     Xml,
 }
+impl Default for FileType {
+    fn default() -> Self {
+        FileType::Html
+    }
+}
 impl Display for FileType {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         match self {
@@ -38,26 +43,40 @@ pub struct Data {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(deny_unknown_fields)]
 pub struct Post {
+    #[serde(default)]
     pub author: String,
+    #[serde(default)]
     pub author_email: String,
+    #[serde(default)]
     pub published_date: String,
+    #[serde(default)]
     pub updated_date: String,
     pub title: String,
+    #[serde(default)]
     pub description: String,
+    #[serde(default)]
     pub category: String,
+    #[serde(default)]
     pub publish: bool,
+    #[serde(default)]
     pub file_type: FileType,
+    #[serde(default)]
     pub tags: Vec<String>,
+    #[serde(default)]
     pub references: Vec<String>,
+    #[serde(default)]
     pub bibliography: Vec<String>,
+    #[serde(default)]
     pub table_of_contents: Vec<String>,
+    #[serde(default)]
     pub links: Vec<String>,
 }
 
-impl Post {
-    pub fn default() -> Post {
-        Post {
+impl Default for Post {
+    fn default() -> Self {
+        Self {
             author: "".to_owned(),
             author_email: "".to_owned(),
             published_date: date_today(),
@@ -66,7 +85,7 @@ impl Post {
             description: "".to_owned(),
             category: "uncategorised".to_owned(),
             publish: false,
-            file_type: FileType::Html,
+            file_type: FileType::default(),
             tags: vec![],
             references: vec![],
             bibliography: vec![],
