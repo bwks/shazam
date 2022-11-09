@@ -83,6 +83,7 @@ pub struct Posts {
     pub categories: Vec<String>,
     pub tags: Vec<String>,
     pub years: Vec<i32>,
+    pub content: HashMap<String, String>,
     pub by_content: HashMap<String, Vec<Post>>,
     pub by_category: HashMap<String, Vec<Post>>,
     pub by_tag: HashMap<String, Vec<Post>>,
