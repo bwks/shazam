@@ -240,10 +240,10 @@ pub fn build() -> Result<()> {
             None => vec![],
         };
         for mut post in dir_posts.iter_mut() {
-            if post.author == "".to_owned() {
+            if post.author.is_empty() {
                 post.author = config.owner.to_owned()
             }
-            if post.author_email == "".to_owned() {
+            if post.author_email.is_empty() {
                 post.author_email = config.owner_email.to_owned()
             }
         }
