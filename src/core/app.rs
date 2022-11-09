@@ -256,7 +256,7 @@ pub fn build() -> Result<()> {
         // Get the rendered body content from posts
         let re = Regex::new(r"^[\s\S]*<body[^>]*>([\s\S]*)</body>[\s\S]*$")?;
         let mut body_content: HashMap<String, String> = HashMap::new();
-        for post in dir_posts.to_owned() {
+        for post in &dir_posts {
             let post_title = parameterize(post.title.to_owned());
             let file_name = format!("{post_title}.{jinja_file}");
 
@@ -266,7 +266,7 @@ pub fn build() -> Result<()> {
             post_ctx.insert("posts", &posts);
             let tmpl = render_template(&env, &format!("{dir}{PATH_SEP}{file_name}"), &post_ctx)?;
 
-            let content = match re.captures(&tmpl.as_str()) {
+            let content = match re.captures(&tmpl) {
                 Some(s) => s[1].to_string(),
                 None => "".to_string(),
             };
@@ -274,7 +274,7 @@ pub fn build() -> Result<()> {
         }
         posts.content = body_content;
 
-        for post in dir_posts.to_owned() {
+        for post in &dir_posts {
             let post_title = parameterize(post.title.to_owned());
             let file_name = format!("{post_title}.{jinja_file}");
             let (file_type, file_path) = match post.file_type {
