@@ -4,7 +4,20 @@ use titlecase::titlecase;
 
 /// Convert a string to a parameterized string
 pub fn parameterize(source: String) -> String {
-    source.replace(' ', "-").to_lowercase()
+    let stripped = source
+        .replace('-', " ")
+        .replace('_', " ")
+        .replace(':', " ")
+        .to_lowercase();
+
+    let split: Vec<&str> = stripped.split_ascii_whitespace().collect();
+
+    split
+        .iter()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .collect::<Vec<_>>()
+        .join("-")
 }
 
 /// Convert a string to capital case.
@@ -35,6 +48,11 @@ mod tests {
             ("Test String".to_owned(), "test-string".to_owned()),
             ("TestString".to_owned(), "teststring".to_owned()),
             ("test string".to_owned(), "test-string".to_owned()),
+            ("test_string".to_owned(), "test-string".to_owned()),
+            ("test-string".to_owned(), "test-string".to_owned()),
+            ("test: string".to_owned(), "test-string".to_owned()),
+            ("test : - _ string".to_owned(), "test-string".to_owned()),
+            ("test :-_ string".to_owned(), "test-string".to_owned()),
         ];
         for t in test_cases {
             let result = parameterize(t.0);
