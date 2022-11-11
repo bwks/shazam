@@ -4,11 +4,7 @@ use titlecase::titlecase;
 
 /// Convert a string to a parameterized string
 pub fn parameterize(source: String) -> String {
-    let stripped = source
-        .replace('-', " ")
-        .replace('_', " ")
-        .replace(':', " ")
-        .to_lowercase();
+    let stripped = source.replace(['-', '_', ':'], " ").to_lowercase();
 
     let split: Vec<&str> = stripped.split_ascii_whitespace().collect();
 
