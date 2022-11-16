@@ -57,7 +57,10 @@ mod tests {
             ("test: string".to_owned(), "test-string".to_owned()),
             ("test : - _ string".to_owned(), "test-string".to_owned()),
             ("test :-_ string".to_owned(), "test-string".to_owned()),
-            ("test-_:()[]{}<>/\\\"!@#$%^&*? .+=|~`'string".to_owned(), "test-string".to_owned()),
+            (
+                "test-_:()[]{}<>/\\\"!@#$%^&*? .+=|~`'string".to_owned(),
+                "test-string".to_owned(),
+            ),
         ];
         for t in test_cases {
             let result = parameterize(t.0);
