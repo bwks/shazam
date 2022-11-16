@@ -4,7 +4,15 @@ use titlecase::titlecase;
 
 /// Convert a string to a parameterized string
 pub fn parameterize(source: String) -> String {
-    let stripped = source.replace(['-', '_', ':'], " ").to_lowercase();
+    let stripped = source
+        .replace(
+            [
+                '-', '_', ':', '(', ')', '[', ']', '{', '}', '<', '>', '/', '\\', '\'', '"', '!',
+                '@', '#', '$', '%', '^', '&', '*', '?', ',', '.', '+', '=', '|', '~', '`',
+            ],
+            " ",
+        )
+        .to_lowercase();
 
     let split: Vec<&str> = stripped.split_ascii_whitespace().collect();
 
@@ -49,6 +57,7 @@ mod tests {
             ("test: string".to_owned(), "test-string".to_owned()),
             ("test : - _ string".to_owned(), "test-string".to_owned()),
             ("test :-_ string".to_owned(), "test-string".to_owned()),
+            ("test-_:()[]{}<>/\\\"!@#$%^&*? .+=|~`'string".to_owned(), "test-string".to_owned()),
         ];
         for t in test_cases {
             let result = parameterize(t.0);
