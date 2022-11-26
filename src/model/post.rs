@@ -1,11 +1,13 @@
 use std::cmp::Reverse;
 use std::collections::{HashMap, HashSet};
 use std::fmt::{Display, Formatter};
+use std::fs;
 use std::path::MAIN_SEPARATOR as PATH_SEP;
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use chrono::Datelike;
 use serde::{Deserialize, Serialize};
+use toml::Value;
 
 use crate::model::config::Config;
 use crate::util::date_time::{date_today, to_date};
@@ -103,6 +105,7 @@ pub struct Posts {
     pub tags: Vec<String>,
     pub years: Vec<i32>,
     pub content: HashMap<String, String>,
+    pub data: HashMap<String, Value>,
     pub by_content: HashMap<String, Vec<Post>>,
     pub by_category: HashMap<String, Vec<Post>>,
     pub by_tag: HashMap<String, Vec<Post>>,
@@ -172,6 +175,30 @@ impl Posts {
         posts.categories = to_string_vec(all_categories);
         posts.tags = to_string_vec(all_tags);
         posts.years = all_years.into_iter().collect();
+
+        // Datafiles
+        let mut file_data: HashMap<String, Value> = HashMap::new();
+        for entry in fs::read_dir(format!("{project_name}{PATH_SEP}{data_dir}"))? {
+            let file = entry?.file_name().into_string();
+            match file {
+                Ok(file_name) => {
+                    if file_name.ends_with(".toml")
+                        && !content_dirs.contains(&file_name.replace(".toml", ""))
+                    {
+                        let data_file = fs::read_to_string(format!(
+                            "{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{file_name}"
+                        ))?;
+                        let data: HashMap<String, Value> = toml::from_str(data_file.as_str())?;
+                        for (k, v) in data.into_iter() {
+                            file_data.insert(k, v);
+                        }
+                    }
+                }
+                Err(_) => bail!("error loading data_filenames"),
+            }
+        }
+
+        posts.data = file_data;
 
         Ok(posts)
     }

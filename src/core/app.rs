@@ -4,7 +4,6 @@ use std::path::MAIN_SEPARATOR as PATH_SEP;
 
 use anyhow::{bail, Result};
 use tera::Context;
-use toml;
 
 use crate::core::konst::{
     ASSETS_DIR, BLOG_DATA_FILE, BLOG_DIR, CONFIG_DIR, CONFIG_FILE, CSS_DIR, DATA_DIR,
@@ -320,6 +319,11 @@ pub fn build() -> Result<()> {
             post_ctx.insert("config", &config);
             post_ctx.insert("post", &post);
             post_ctx.insert("posts", &posts);
+            // for (k, v) in &file_data {
+            //     post_ctx.insert(k, &v)
+            // }
+            // post_ctx.extend(datafiles_ctx.to_owned());
+
             let tmpl = render_template(&env, &format!("{dir}{PATH_SEP}{file_name}"), &post_ctx)?;
             make_file(&format!("{file_path}{PATH_SEP}{file_type}"), &tmpl)?;
         }
