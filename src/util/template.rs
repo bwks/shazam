@@ -6,12 +6,11 @@ use tera::{Context, Tera};
 
 use crate::core::konst::TEMPLATES_DIR;
 use crate::model::config::Config;
-use crate::util::{date_time, text};
+use crate::util::date_time;
 
 pub fn init_env(current_dir: &String, project: &String) -> Result<Tera> {
     let mut env = Tera::new(&format!("{current_dir}/{project}/templates/**/*.jinja"))?;
     env.register_filter("human_date", date_time::human_date);
-    env.register_filter("title_case", text::title_case);
     Ok(env)
 }
 

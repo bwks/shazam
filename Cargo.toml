@@ -1,6 +1,6 @@
 [package]
 name = "shazam"
-version = "0.1.14"
+version = "0.1.15"
 edition = "2021"
 authors = ["Bradley Searle"]
 license = "MIT"
@@ -14,7 +14,6 @@ chrono = "0.4.22"
 regex = "1.7.0"
 serde = { version = "1.0.145", features = ["derive"] }
 tera = { version = "1.17.1", features = ["builtins"] }
-titlecase = "2.2.1"
 tokio = { version = "1.0", features = ["full"] }
 toml = "0.5.9"
 tower-http = { version = "0.3.0", features = ["fs", "trace"] }

@@ -63,7 +63,7 @@ pub const BLOG_LAYOUT: &str = r#"{% extends "_layouts/site.jinja" %}
         {% if post.publish %}
           <div class="py-2">
             <div class="block p-4 rounded-lg shadow-lg bg-white border-2">
-              <a class="text-fuchsia-500 font-semibold text-xl no-underline hover:underline" href="/blog/{{ post.title | slugify }}">{{ post.title | title_case }}</a>
+              <a class="text-fuchsia-500 font-semibold text-xl no-underline hover:underline" href="/blog/{{ post.title | slugify }}">{{ post.title | title }}</a>
               <p class="text-gray-400 text-md italic">
                 published: {{ post.published_date }}
               </p>
@@ -104,7 +104,7 @@ pub const LOREM_IPSUM_INCLUDE: &str = r#"<p class="py-2">
 
 pub const PAGE_HEADER_MACRO: &str = r#"{% macro page_header(heading, published_date="") %}
 <div class="pt-5">
-  <h1 class="text-5xl pb-3 font-black">{{ heading | title_case }}</h1>
+  <h1 class="text-5xl pb-3 font-black">{{ heading | title }}</h1>
   {% if published_date %}
     <p class="text-gray-500 italic">published: {{ published_date | human_date }}</p>
   {% endif %}

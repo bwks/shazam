@@ -2,7 +2,7 @@ pub const RSS_FEED_TEMPLATE: &str = r#"<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <atom:link href="{{ config.project }}.com" rel="self" type="application/rss+xml"/>
-    <title>{{ config.project | title_case }} Blog</title>
+    <title>{{ config.project | title }} Blog</title>
     <link>{{ config.project }}.com/blog/</link>
     <description>Super awesome blog</description>
     <copyright>Copyright {{ config.owner }} {{ now() | date(format="%Y") }} All Rights Reserved</copyright>
