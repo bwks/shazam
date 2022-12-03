@@ -57,28 +57,6 @@ pub const BLOG_LAYOUT: &str = r#"{% extends "_layouts/site.jinja" %}
 {% endblock page_header %}
 
 {% block page_content %}
-  <div class="">
-    {% for key, value in posts.by_category %}
-      {% for post in value %}
-        {% if post.publish %}
-          <div class="py-2">
-            <div class="block p-4 rounded-lg shadow-lg bg-white border-2">
-              <a class="text-fuchsia-500 font-semibold text-xl no-underline hover:underline" href="/blog/{{ post.title | slugify }}">{{ post.title | title }}</a>
-              <p class="text-gray-400 text-md italic">
-                published: {{ post.published_date }}
-              </p>
-              <p class="text-gray-800 text-lg">
-                {{ post.description }}
-              </p>
-              <div class="">
-                {{ tags::tags(tags=post.tags) }}
-              </div>
-            </div>
-          </div>
-        {% endif %}
-      {% endfor %}
-    {% endfor %}
-  </div>
 {% endblock page_content %}
 
 {% block page_tags %}
@@ -142,6 +120,33 @@ pub const SITE_INDEX_TEMPLATE: &str = r#"{% extends "_layouts/site.jinja" %}
       </div>
     </div>
   {% endfor %}
+{% endblock page_content %}
+"#;
+
+pub const BLOG_INDEX_TEMPLATE: &str = r#"{% extends "_layouts/blog.jinja" %}
+{% block page_content %}
+  <div class="">
+    {% for key, value in posts.by_category %}
+      {% for post in value %}
+        {% if post.publish %}
+          <div class="py-2">
+            <div class="block p-4 rounded-lg shadow-lg bg-white border-2">
+              <a class="text-fuchsia-500 font-semibold text-xl no-underline hover:underline" href="/blog/{{ post.title | slugify }}">{{ post.title | title }}</a>
+              <p class="text-gray-400 text-md italic">
+                published: {{ post.published_date }}
+              </p>
+              <p class="text-gray-800 text-lg">
+                {{ post.description }}
+              </p>
+              <div class="">
+                {{ tags::tags(tags=post.tags) }}
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+  </div>
 {% endblock page_content %}
 "#;
 

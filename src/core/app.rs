@@ -4,6 +4,7 @@ use std::path::MAIN_SEPARATOR as PATH_SEP;
 
 use anyhow::{bail, Result};
 use tera::Context;
+use toml;
 
 use crate::core::konst::{
     ASSETS_DIR, BLOG_DATA_FILE, BLOG_DIR, CONFIG_DIR, CONFIG_FILE, CSS_DIR, DATA_DIR,
@@ -145,8 +146,13 @@ pub fn init(project: String, owner: String, owner_email: String) -> Result<Confi
 
     // Site files
     make_file(
-        &format!("{project_name}{PATH_SEP}{project_name}.{jinja_file}"),
+        &format!("{project_name}{PATH_SEP}index.{jinja_file}"),
         &html::SITE_INDEX_TEMPLATE.to_owned(),
+    )?;
+    // blog index file
+    make_file(
+        &format!("{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{BLOG_DIR}{PATH_SEP}index.{jinja_file}"),
+        &html::BLOG_INDEX_TEMPLATE.to_owned(),
     )?;
     make_file(
         &format!(
@@ -216,16 +222,13 @@ pub fn build() -> Result<()> {
     let mut env = init_env(&current_dir, &project_name)?;
 
     // Project index template file
-    env.add_template_file(
-        format!("{project_name}{PATH_SEP}{project_name}.{jinja_file}"),
-        None,
-    )?;
+    env.add_template_file(format!("{project_name}{PATH_SEP}index.{jinja_file}"), None)?;
     let mut index_ctx = Context::new();
     index_ctx.insert("config", &config);
     index_ctx.insert("posts", &posts);
     let tmpl = render_template(
         &env,
-        &format!("{project_name}{PATH_SEP}{project_name}.{jinja_file}"),
+        &format!("{project_name}{PATH_SEP}index.{jinja_file}"),
         &index_ctx,
     )?;
     make_file(
@@ -260,7 +263,8 @@ pub fn build() -> Result<()> {
         dir_ctx.insert("posts", &posts);
         let dir_tmpl = render_template(
             &env,
-            &format!("{LAYOUTS_DIR}{PATH_SEP}{dir}.{jinja_file}"),
+            // &format!("{LAYOUTS_DIR}{PATH_SEP}{dir}.{jinja_file}"),
+            &format!("{dir}{PATH_SEP}index.{jinja_file}"),
             &dir_ctx,
         )?;
         make_file(
@@ -319,11 +323,6 @@ pub fn build() -> Result<()> {
             post_ctx.insert("config", &config);
             post_ctx.insert("post", &post);
             post_ctx.insert("posts", &posts);
-            // for (k, v) in &file_data {
-            //     post_ctx.insert(k, &v)
-            // }
-            // post_ctx.extend(datafiles_ctx.to_owned());
-
             let tmpl = render_template(&env, &format!("{dir}{PATH_SEP}{file_name}"), &post_ctx)?;
             make_file(&format!("{file_path}{PATH_SEP}{file_type}"), &tmpl)?;
         }
