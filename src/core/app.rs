@@ -146,8 +146,13 @@ pub fn init(project: String, owner: String, owner_email: String) -> Result<Confi
 
     // Site files
     make_file(
-        &format!("{project_name}{PATH_SEP}{project_name}.{jinja_file}"),
+        &format!("{project_name}{PATH_SEP}index.{jinja_file}"),
         &html::SITE_INDEX_TEMPLATE.to_owned(),
+    )?;
+    // Add blog index file
+    make_file(
+        &format!("{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{BLOG_DIR}{PATH_SEP}index.{jinja_file}"),
+        &html::BLOG_INDEX_TEMPLATE.to_owned(),
     )?;
     make_file(
         &format!(
@@ -217,16 +222,13 @@ pub fn build() -> Result<()> {
     let mut env = init_env(&current_dir, &project_name)?;
 
     // Project index template file
-    env.add_template_file(
-        format!("{project_name}{PATH_SEP}{project_name}.{jinja_file}"),
-        None,
-    )?;
+    env.add_template_file(format!("{project_name}{PATH_SEP}index.{jinja_file}"), None)?;
     let mut index_ctx = Context::new();
     index_ctx.insert("config", &config);
     index_ctx.insert("posts", &posts);
     let tmpl = render_template(
         &env,
-        &format!("{project_name}{PATH_SEP}{project_name}.{jinja_file}"),
+        &format!("{project_name}{PATH_SEP}index.{jinja_file}"),
         &index_ctx,
     )?;
     make_file(
@@ -261,7 +263,8 @@ pub fn build() -> Result<()> {
         dir_ctx.insert("posts", &posts);
         let dir_tmpl = render_template(
             &env,
-            &format!("{LAYOUTS_DIR}{PATH_SEP}{dir}.{jinja_file}"),
+            // &format!("{LAYOUTS_DIR}{PATH_SEP}{dir}.{jinja_file}"),
+            &format!("{dir}{PATH_SEP}index.{jinja_file}"),
             &dir_ctx,
         )?;
         make_file(
