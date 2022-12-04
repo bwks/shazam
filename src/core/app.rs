@@ -242,7 +242,7 @@ pub fn build() -> Result<()> {
     // TODO: refactor to function
     template_hashes
         .entry(index_tmpl_name.to_owned())
-        .or_insert("".to_owned());
+        .or_insert_with(|| "".to_owned());
 
     let current_hash = template_hashes[&index_tmpl_name].to_owned();
     let this_hash = template_hasher(&tmpl);
@@ -289,7 +289,7 @@ pub fn build() -> Result<()> {
         // TODO: refactor to function
         template_hashes
             .entry(dir_tmpl_name.to_owned())
-            .or_insert("".to_owned());
+            .or_insert_with(|| "".to_owned());
 
         let current_hash = template_hashes[&dir_tmpl_name].to_owned();
         let this_hash = template_hasher(&tmpl);
@@ -360,7 +360,7 @@ pub fn build() -> Result<()> {
 
             template_hashes
                 .entry(template_name.to_owned())
-                .or_insert("".to_owned());
+                .or_insert_with(|| "".to_owned());
 
             let current_hash = template_hashes[&template_name].to_owned();
             let this_hash = template_hasher(&tmpl);
