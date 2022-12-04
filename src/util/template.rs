@@ -2,6 +2,7 @@ use std::fs;
 use std::path::MAIN_SEPARATOR as PATH_SEP;
 
 use anyhow::{bail, Result};
+use md5::{Digest, Md5};
 use tera::{Context, Tera};
 
 use crate::core::konst::TEMPLATES_DIR;
@@ -25,6 +26,11 @@ pub fn render_template(env: &Tera, template_name: &str, kontext: &Context) -> Re
             ))
         }
     }
+}
+
+pub fn template_hasher(tempalte: &String) -> String {
+    let template_hash = Md5::digest(tempalte.as_bytes());
+    format!("{:x}", template_hash)
 }
 
 /// Load all project templaes into environment

@@ -23,3 +23,4 @@ pub const FONT_DIR: &str = "font";
 pub const FAVICON_DIR: &str = "favicon";
 pub const ERROR_DIR: &str = "error";
 pub const RSS_FEED_FILE: &str = "feed.xml";
+pub const TEMPLATE_HASHES_FILENAME: &str = ".shazam_template_hashes.json";

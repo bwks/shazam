@@ -1,5 +1,6 @@
 use regex::Regex;
 use std::collections::HashMap;
+use std::fs;
 use std::path::MAIN_SEPARATOR as PATH_SEP;
 
 use anyhow::{bail, Result};
@@ -10,6 +11,7 @@ use crate::core::konst::{
     ASSETS_DIR, BLOG_DATA_FILE, BLOG_DIR, CONFIG_DIR, CONFIG_FILE, CSS_DIR, DATA_DIR,
     HTML_INDEX_FILE, INCLUDES_DIR, LAYOUTS_DIR, MACROS_DIR, OUTPUT_DIR, PROC_FILE, PROC_FILE_DEV,
     RSS_FEED_FILE, TAILWIND_CONFIG_FILE, TAILWIND_INPUT_FILE, TEMPLATES_DIR,
+    TEMPLATE_HASHES_FILENAME,
 };
 use crate::model::config::Config;
 use crate::model::post::{Data, FileType, Post, Posts};
@@ -20,7 +22,7 @@ use crate::template::{html, rss};
 use crate::util::date_time::date_today;
 use crate::util::file_sys::{copy_recursively, current_dir, make_dirs, make_file};
 use crate::util::helper::load_config;
-use crate::util::template::{init_env, render_template};
+use crate::util::template::{init_env, render_template, template_hasher};
 use crate::util::text::parameterize;
 
 /// Initial site directories and files
@@ -221,20 +223,39 @@ pub fn build() -> Result<()> {
     // Template environment
     let mut env = init_env(&current_dir, &project_name)?;
 
+    let mut template_hashes: HashMap<String, String> =
+        match fs::read_to_string(TEMPLATE_HASHES_FILENAME) {
+            Ok(s) => serde_json::from_str(&s)?,
+            Err(_) => HashMap::new(),
+        };
+
     // Project index template file
-    env.add_template_file(format!("{project_name}{PATH_SEP}index.{jinja_file}"), None)?;
+    let index_tmpl_name = format!("{project_name}{PATH_SEP}index.{jinja_file}");
+
+    env.add_template_file(&index_tmpl_name, None)?;
     let mut index_ctx = Context::new();
     index_ctx.insert("config", &config);
     index_ctx.insert("posts", &posts);
-    let tmpl = render_template(
-        &env,
-        &format!("{project_name}{PATH_SEP}index.{jinja_file}"),
-        &index_ctx,
-    )?;
-    make_file(
-        &format!("{project_name}{PATH_SEP}{output_dir}{PATH_SEP}{HTML_INDEX_FILE}"),
-        &tmpl,
-    )?;
+
+    let tmpl = render_template(&env, &index_tmpl_name, &index_ctx)?;
+
+    // TODO: refactor to function
+    template_hashes
+        .entry(index_tmpl_name.to_owned())
+        .or_insert("".to_owned());
+
+    let current_hash = template_hashes[&index_tmpl_name].to_owned();
+    let this_hash = template_hasher(&tmpl);
+
+    if current_hash != this_hash {
+        println!("File: `{index_tmpl_name}` has changed, rebuilding...");
+        template_hashes.insert(index_tmpl_name, this_hash);
+        make_file(
+            &format!("{project_name}{PATH_SEP}{output_dir}{PATH_SEP}{HTML_INDEX_FILE}"),
+            &tmpl,
+        )?;
+    }
+    //
 
     for dir in content_dirs {
         let mut dir_posts: Vec<Post> = match posts.by_content.get(&dir) {
@@ -261,18 +282,29 @@ pub fn build() -> Result<()> {
         let mut dir_ctx = Context::new();
         dir_ctx.insert("config", &config);
         dir_ctx.insert("posts", &posts);
-        let dir_tmpl = render_template(
-            &env,
-            // &format!("{LAYOUTS_DIR}{PATH_SEP}{dir}.{jinja_file}"),
-            &format!("{dir}{PATH_SEP}index.{jinja_file}"),
-            &dir_ctx,
-        )?;
-        make_file(
-            &format!(
-                "{project_name}{PATH_SEP}{OUTPUT_DIR}{PATH_SEP}{dir}{PATH_SEP}{HTML_INDEX_FILE}"
-            ),
-            &dir_tmpl,
-        )?;
+
+        let dir_tmpl_name = format!("{dir}{PATH_SEP}index.{jinja_file}");
+        let dir_tmpl = render_template(&env, &dir_tmpl_name, &dir_ctx)?;
+
+        // TODO: refactor to function
+        template_hashes
+            .entry(dir_tmpl_name.to_owned())
+            .or_insert("".to_owned());
+
+        let current_hash = template_hashes[&dir_tmpl_name].to_owned();
+        let this_hash = template_hasher(&tmpl);
+
+        if current_hash != this_hash {
+            println!("File: `{dir_tmpl_name}` has changed, rebuilding...");
+            template_hashes.insert(dir_tmpl_name, this_hash);
+            make_file(
+                &format!(
+                    "{project_name}{PATH_SEP}{OUTPUT_DIR}{PATH_SEP}{dir}{PATH_SEP}{HTML_INDEX_FILE}"
+                ),
+                &dir_tmpl,
+            )?;
+        }
+        //
 
         // Get the rendered body content from posts
         let re = Regex::new(r"^[\s\S]*<body[^>]*>([\s\S]*)</body>[\s\S]*$")?;
@@ -323,10 +355,29 @@ pub fn build() -> Result<()> {
             post_ctx.insert("config", &config);
             post_ctx.insert("post", &post);
             post_ctx.insert("posts", &posts);
-            let tmpl = render_template(&env, &format!("{dir}{PATH_SEP}{file_name}"), &post_ctx)?;
-            make_file(&format!("{file_path}{PATH_SEP}{file_type}"), &tmpl)?;
+            let template_name = format!("{dir}{PATH_SEP}{file_name}");
+            let tmpl = render_template(&env, &template_name, &post_ctx)?;
+
+            template_hashes
+                .entry(template_name.to_owned())
+                .or_insert("".to_owned());
+
+            let current_hash = template_hashes[&template_name].to_owned();
+            let this_hash = template_hasher(&tmpl);
+
+            if current_hash != this_hash {
+                println!("File: `{template_name}` has changed, rebuilding...");
+                template_hashes.insert(template_name, this_hash);
+                make_file(&format!("{file_path}{PATH_SEP}{file_type}"), &tmpl)?;
+            }
         }
     }
+
+    // Write tempalate file hashses to file for future reading
+    make_file(
+        &TEMPLATE_HASHES_FILENAME.to_owned(),
+        &serde_json::to_string(&template_hashes)?,
+    )?;
 
     // Move assets
     copy_recursively(
