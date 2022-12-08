@@ -292,7 +292,7 @@ pub fn build() -> Result<()> {
             .or_insert_with(|| "".to_owned());
 
         let current_hash = template_hashes[&dir_tmpl_name].to_owned();
-        let this_hash = template_hasher(&tmpl);
+        let this_hash = template_hasher(&dir_tmpl);
 
         if current_hash != this_hash {
             println!("File: `{dir_tmpl_name}` has changed, rebuilding...");
@@ -356,19 +356,19 @@ pub fn build() -> Result<()> {
             post_ctx.insert("post", &post);
             post_ctx.insert("posts", &posts);
             let template_name = format!("{dir}{PATH_SEP}{file_name}");
-            let tmpl = render_template(&env, &template_name, &post_ctx)?;
+            let post_tmpl = render_template(&env, &template_name, &post_ctx)?;
 
             template_hashes
                 .entry(template_name.to_owned())
                 .or_insert_with(|| "".to_owned());
 
             let current_hash = template_hashes[&template_name].to_owned();
-            let this_hash = template_hasher(&tmpl);
+            let this_hash = template_hasher(&post_tmpl);
 
             if current_hash != this_hash {
                 println!("File: `{template_name}` has changed, rebuilding...");
                 template_hashes.insert(template_name, this_hash);
-                make_file(&format!("{file_path}{PATH_SEP}{file_type}"), &tmpl)?;
+                make_file(&format!("{file_path}{PATH_SEP}{file_type}"), &post_tmpl)?;
             }
         }
     }
