@@ -16,16 +16,12 @@ pub fn init_env(current_dir: &String, project: &String) -> Result<Tera> {
 }
 
 /// Render a template
-pub fn render_template(env: &Tera, template_name: &str, kontext: &Context) -> Result<String> {
-    match env.render(template_name, kontext) {
-        Ok(r) => Ok(r),
-        Err(e) => {
-            bail!(format!(
-                " Failed to render: {}\n Error: {}",
-                template_name, e
-            ))
-        }
-    }
+pub fn render_template(
+    env: &Tera,
+    template_name: &str,
+    kontext: &Context,
+) -> Result<String, tera::Error> {
+    env.render(template_name, kontext).map_err(|e| e)
 }
 
 pub fn template_hasher(tempalte: &String) -> String {

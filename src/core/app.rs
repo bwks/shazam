@@ -2,10 +2,12 @@ use regex::Regex;
 use std::collections::HashMap;
 use std::fs;
 use std::path::MAIN_SEPARATOR as PATH_SEP;
+use tracing::event;
 
 use anyhow::{bail, Result};
 use tera::Context;
 use toml;
+use tracing::Level;
 
 use crate::core::konst::{
     ASSETS_DIR, BLOG_DATA_FILE, BLOG_DIR, CONFIG_DIR, CONFIG_FILE, CSS_DIR, DATA_DIR,
@@ -26,8 +28,9 @@ use crate::util::template::{init_env, render_template, template_hasher};
 use crate::util::text::parameterize;
 
 /// Initial site directories and files
+#[tracing::instrument]
 pub fn init(project: String, owner: String, owner_email: String) -> Result<Config> {
-    println!("Project: `{project}` => initialzing ...");
+    event!(target: "shazam", Level::INFO, "Project: `{project}` => initialzing ...");
     let current_dir = current_dir()?;
     let config = Config::init(project, owner, owner_email);
     let project_name = config.project.to_owned();
@@ -202,12 +205,13 @@ pub fn init(project: String, owner: String, owner_email: String) -> Result<Confi
     let procfile_dev_tmpl = render_template(&env, PROC_FILE_DEV, &procfile_dev_ctx)?;
     make_file(&PROC_FILE_DEV.to_owned(), &procfile_dev_tmpl)?;
 
-    println!("Project: `{project_name}` => initialization complete");
+    event!(target: "shazam", Level::INFO, "Project: `{project_name}` => initialization complete");
     build()?;
     Ok(config)
 }
 
 /// Build site
+#[tracing::instrument]
 pub fn build() -> Result<()> {
     let current_dir = current_dir()?;
     let config = load_config()?;
@@ -218,7 +222,7 @@ pub fn build() -> Result<()> {
     let mut posts = Posts::init(&config)?;
     let jinja_file = FileType::Jinja;
 
-    println!("Project: `{project_name}` => building ...");
+    event!(target: "shazam", Level::INFO, "Project: `{project_name}` => building ...");
 
     // Template environment
     let mut env = init_env(&current_dir, &project_name)?;
@@ -248,7 +252,7 @@ pub fn build() -> Result<()> {
     let this_hash = template_hasher(&tmpl);
 
     if current_hash != this_hash {
-        println!("File: `{index_tmpl_name}` has changed, rebuilding...");
+        event!(target: "shazam", Level::INFO, "File: `{index_tmpl_name}` has changed, rebuilding...");
         template_hashes.insert(index_tmpl_name, this_hash);
         make_file(
             &format!("{project_name}{PATH_SEP}{output_dir}{PATH_SEP}{HTML_INDEX_FILE}"),
@@ -295,7 +299,7 @@ pub fn build() -> Result<()> {
         let this_hash = template_hasher(&dir_tmpl);
 
         if current_hash != this_hash {
-            println!("File: `{dir_tmpl_name}` has changed, rebuilding...");
+            event!(target: "shazam", Level::INFO, "File: `{dir_tmpl_name}` has changed, rebuilding...");
             template_hashes.insert(dir_tmpl_name, this_hash);
             make_file(
                 &format!(
@@ -366,7 +370,7 @@ pub fn build() -> Result<()> {
             let this_hash = template_hasher(&post_tmpl);
 
             if current_hash != this_hash {
-                println!("File: `{template_name}` has changed, rebuilding...");
+                event!(target: "shazam", Level::INFO, "File: `{template_name}` has changed, rebuilding...");
                 template_hashes.insert(template_name, this_hash);
                 make_file(&format!("{file_path}{PATH_SEP}{file_type}"), &post_tmpl)?;
             }
@@ -385,6 +389,6 @@ pub fn build() -> Result<()> {
         format!("{project_name}{PATH_SEP}{OUTPUT_DIR}"),
     )?;
 
-    println!("Project: `{project_name}` => build complete");
+    event!(target: "shazam", Level::INFO, "Project: `{project_name}` => build complete");
     Ok(())
 }
