@@ -16,6 +16,9 @@ pub fn init_env(current_dir: &String, project: &String) -> Result<Tera> {
 }
 
 /// Render a template
+/// Seems like a clippy bug here for map_err
+/// https://github.com/rust-lang/rust-clippy/issues/6460
+#[allow(clippy::map_identity)]
 pub fn render_template(
     env: &Tera,
     template_name: &str,
