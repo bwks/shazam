@@ -28,7 +28,6 @@ use crate::util::template::{init_env, render_template, template_hasher};
 use crate::util::text::parameterize;
 
 /// Initial site directories and files
-#[tracing::instrument]
 pub fn init(project: String, owner: String, owner_email: String) -> Result<Config> {
     event!(target: "shazam", Level::INFO, "Project: `{project}` => initialzing ...");
     let current_dir = current_dir()?;
@@ -211,7 +210,6 @@ pub fn init(project: String, owner: String, owner_email: String) -> Result<Confi
 }
 
 /// Build site
-#[tracing::instrument]
 pub fn build() -> Result<()> {
     let current_dir = current_dir()?;
     let config = load_config()?;

@@ -1,9 +1,11 @@
 use anyhow::Result;
+use axum::body::Body;
+use axum::http::Request;
 use axum::{http::StatusCode, response::IntoResponse, routing::get_service, Router};
 use std::path::MAIN_SEPARATOR as PATH_SEP;
 use std::{io, net::SocketAddr};
 use tower_http::{services::ServeDir, trace::TraceLayer};
-use tracing::{event, Level};
+use tracing::{event, Level, Span};
 
 use crate::util::helper::load_config;
 
@@ -19,7 +21,14 @@ pub async fn serve(ipv4_address: String, port: u16) -> Result<()> {
             "{project_name}{PATH_SEP}{output_dir}{PATH_SEP}"
         )))
         .handle_error(handle_error)
-        .layer(TraceLayer::new_for_http()),
+        .layer(
+            TraceLayer::new_for_http()
+            .on_request(|request: &Request<Body>, _span: &Span| {
+                    event!(target: "shazam", Level::INFO, "{} {}", request.method(), request.uri())
+                    },
+                )
+
+        )
     );
     let addr: SocketAddr = format!("{ipv4_address}:{port}").parse()?;
 
