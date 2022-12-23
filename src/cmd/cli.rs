@@ -3,6 +3,7 @@ use std::fs;
 use std::path::MAIN_SEPARATOR as PATH_SEP;
 
 use anyhow::Result;
+use tracing::{event, Level};
 
 use crate::core::konst::TEMPLATES_DIR;
 use crate::http;
@@ -131,7 +132,7 @@ pub async fn init() -> Result<()> {
                 )?;
                 Ok(())
             } else {
-                println!("Sorry, content type {content_type} not found!");
+                event!(target: "shazam", Level::INFO, "Content type {content_type} not found!");
                 Ok(())
             }
         }
