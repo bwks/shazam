@@ -1,6 +1,5 @@
 use std::cmp::Reverse;
 use std::fs;
-use std::path::MAIN_SEPARATOR as PATH_SEP;
 
 use anyhow::Result;
 use tracing::{event, Level};
@@ -108,9 +107,8 @@ pub async fn init() -> Result<()> {
                 .iter()
                 .any(|e| generate_command.content_type.eq(e))
             {
-                let content_file = fs::read_to_string(format!(
-                    "{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{content_type}.toml"
-                ))?;
+                let content_file =
+                    fs::read_to_string(format!("{project_name}/{data_dir}/{content_type}.toml"))?;
                 let mut data: Data = toml::from_str(content_file.as_str())?;
                 let post = Post {
                     title: generate_command.title.to_owned(),
@@ -123,11 +121,11 @@ pub async fn init() -> Result<()> {
                     .sort_by_key(|x| Reverse(x.published_date.to_owned()));
 
                 make_file(
-                    &format!("{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{content_type}.toml"),
+                    &format!("{project_name}/{data_dir}/{content_type}.toml"),
                     &toml::to_string(&data)?,
                 )?;
                 make_file(
-                    &format!("{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{content_type}{PATH_SEP}{post_title}.jinja"),
+                    &format!("{project_name}/{TEMPLATES_DIR}/{content_type}/{post_title}.jinja"),
                     &html::BLOG_POST_TEMPLATE.to_owned(),
                 )?;
                 Ok(())
