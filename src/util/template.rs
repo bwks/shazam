@@ -1,8 +1,7 @@
-use std::collections::HashMap;
-use std::fs;
-
 use anyhow::{bail, Result};
 use md5::{Digest, Md5};
+use std::collections::HashMap;
+use std::fs;
 use tera::{Context, Tera};
 use tracing::{event, Level};
 
