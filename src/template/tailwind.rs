@@ -1,7 +1,7 @@
 pub const CONFIG: &str = r#"/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    '{{ project }}{{ path_sep }}{{ output_dir }}{{ path_sep }}**{{ path_sep }}*.{html,js}'
+    '{{ project }}/{{ output_dir }}/**/*.{html,js}'
   ],
   safelist: [],
   theme: {

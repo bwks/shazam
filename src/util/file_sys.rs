@@ -2,10 +2,10 @@ use std::env;
 use std::fs;
 use std::io;
 use std::path::Path;
-use std::path::MAIN_SEPARATOR as PATH_SEP;
 
 use anyhow::{bail, Result};
 
+/// Get the full path to the current working directory
 pub fn current_dir() -> Result<String> {
     let cwd = env::current_dir()?;
     match cwd.to_str() {
@@ -14,16 +14,21 @@ pub fn current_dir() -> Result<String> {
     }
 }
 
+/// Create the child directories for a parent path
 pub fn make_dirs(parent_path: &String, directories: Vec<String>) -> Result<()> {
     for d in directories {
-        fs::create_dir_all(format!("{parent_path}{PATH_SEP}{d}"))?;
-        fs::File::create(format!("{parent_path}{PATH_SEP}{d}{PATH_SEP}.gitkeep"))?;
+        let dir_path = format!("{parent_path}/{d}");
+        let file_path = format!("{parent_path}/{d}/.gitkeep");
+        fs::create_dir_all(Path::new(dir_path.as_str()))?;
+        fs::File::create(Path::new(file_path.as_str()))?;
     }
     Ok(())
 }
 
+/// Create a file with the supplient content
 pub fn make_file(path: &String, content: &String) -> Result<()> {
-    fs::write(path, content)?;
+    let file_path = Path::new(path);
+    fs::write(file_path, content)?;
     Ok(())
 }
 

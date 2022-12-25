@@ -1,7 +1,7 @@
 use regex::Regex;
 use std::collections::HashMap;
 use std::fs;
-use std::path::MAIN_SEPARATOR as PATH_SEP;
+
 use tracing::event;
 
 use anyhow::{bail, Result};
@@ -24,7 +24,7 @@ use crate::template::{html, rss};
 use crate::util::date_time::date_today;
 use crate::util::file_sys::{copy_recursively, current_dir, make_dirs, make_file};
 use crate::util::helper::load_config;
-use crate::util::template::{init_env, render_template, template_hasher};
+use crate::util::template::{init_env, render_template, template_builder};
 use crate::util::text::parameterize;
 
 /// Initial site directories and files
@@ -43,28 +43,22 @@ pub fn init(project: String, owner: String, owner_email: String) -> Result<Confi
 
     // Build project
     // Directories
-    make_dirs(&format!(".{PATH_SEP}"), vec![CONFIG_DIR.to_owned()])?;
+    make_dirs(&"./".to_owned(), vec![CONFIG_DIR.to_owned()])?;
     make_dirs(
         &project_name,
         vec![DATA_DIR.to_owned(), OUTPUT_DIR.to_owned()],
     )?;
     make_dirs(
-        &format!("{project_name}{PATH_SEP}{ASSETS_DIR}"),
+        &format!("{project_name}/{ASSETS_DIR}"),
         asset_dirs.to_owned(),
     )?;
+    make_dirs(&format!("{project_name}/{TEMPLATES_DIR}"), template_dirs)?;
     make_dirs(
-        &format!("{project_name}{PATH_SEP}{TEMPLATES_DIR}"),
-        template_dirs,
-    )?;
-    make_dirs(
-        &format!("{project_name}{PATH_SEP}{TEMPLATES_DIR}"),
+        &format!("{project_name}/{TEMPLATES_DIR}"),
         content_dirs.to_owned(),
     )?;
-    make_dirs(
-        &format!("{project_name}{PATH_SEP}{OUTPUT_DIR}"),
-        content_dirs,
-    )?;
-    make_dirs(&format!("{project_name}{PATH_SEP}{OUTPUT_DIR}"), asset_dirs)?;
+    make_dirs(&format!("{project_name}/{OUTPUT_DIR}"), content_dirs)?;
+    make_dirs(&format!("{project_name}/{OUTPUT_DIR}"), asset_dirs)?;
 
     let blog_post = Post {
         author: config.owner.to_owned(),
@@ -93,79 +87,63 @@ pub fn init(project: String, owner: String, owner_email: String) -> Result<Confi
     // Files
     // Config files
     make_file(
-        &format!("{CONFIG_DIR}{PATH_SEP}{CONFIG_FILE}"),
+        &format!("{CONFIG_DIR}/{CONFIG_FILE}"),
         &toml::to_string(&config)?,
     )?;
     make_file(
-        &format!("{project_name}{PATH_SEP}{DATA_DIR}{PATH_SEP}{BLOG_DATA_FILE}"),
+        &format!("{project_name}/{DATA_DIR}/{BLOG_DATA_FILE}"),
         &toml::to_string(&data)?,
     )?;
     make_file(
-        &format!("{project_name}{PATH_SEP}{ASSETS_DIR}{PATH_SEP}{CSS_DIR}{PATH_SEP}{TAILWIND_INPUT_FILE}"),
+        &format!("{project_name}/{ASSETS_DIR}/{CSS_DIR}/{TAILWIND_INPUT_FILE}"),
         &tailwind::CSS.to_owned(),
     )?;
     // Templsate files
     make_file(
-        &format!(
-            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{LAYOUTS_DIR}{PATH_SEP}site.{jinja_file}"
-        ),
+        &format!("{project_name}/{TEMPLATES_DIR}/{LAYOUTS_DIR}/site.{jinja_file}"),
         &html::SITE_LAYOUT.to_owned(),
     )?;
     make_file(
-        &format!(
-            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{LAYOUTS_DIR}{PATH_SEP}blog.{jinja_file}"
-        ),
+        &format!("{project_name}/{TEMPLATES_DIR}/{LAYOUTS_DIR}/blog.{jinja_file}"),
         &html::BLOG_LAYOUT.to_owned(),
     )?;
     make_file(
-        &format!(
-            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{INCLUDES_DIR}{PATH_SEP}footer.{jinja_file}"
-        ),
+        &format!("{project_name}/{TEMPLATES_DIR}/{INCLUDES_DIR}/footer.{jinja_file}"),
         &html::FOOTER_INCLUDE.to_owned(),
     )?;
     make_file(
-        &format!(
-            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{INCLUDES_DIR}{PATH_SEP}lorem-ipsum.{jinja_file}"
-        ),
+        &format!("{project_name}/{TEMPLATES_DIR}/{INCLUDES_DIR}/lorem-ipsum.{jinja_file}"),
         &html::LOREM_IPSUM_INCLUDE.to_owned(),
     )?;
     make_file(
-        &format!(
-            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{MACROS_DIR}{PATH_SEP}page-header.{jinja_file}"
-        ),
+        &format!("{project_name}/{TEMPLATES_DIR}/{MACROS_DIR}/page-header.{jinja_file}"),
         &html::PAGE_HEADER_MACRO.to_owned(),
     )?;
     make_file(
-        &format!(
-            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{MACROS_DIR}{PATH_SEP}link-to.{jinja_file}"
-        ),
+        &format!("{project_name}/{TEMPLATES_DIR}/{MACROS_DIR}/link-to.{jinja_file}"),
         &html::LINK_TO_MACRO.to_owned(),
     )?;
     make_file(
-        &format!(
-            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{MACROS_DIR}{PATH_SEP}tags.{jinja_file}"
-        ),
+        &format!("{project_name}/{TEMPLATES_DIR}/{MACROS_DIR}/tags.{jinja_file}"),
         &html::TAGS_MACRO.to_owned(),
     )?;
 
     // Site files
     make_file(
-        &format!("{project_name}{PATH_SEP}index.{jinja_file}"),
+        &format!("{project_name}/{TEMPLATES_DIR}/index.{jinja_file}"),
         &html::SITE_INDEX_TEMPLATE.to_owned(),
     )?;
-    // blog index file
+    // Blog index file
     make_file(
-        &format!("{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{BLOG_DIR}{PATH_SEP}index.{jinja_file}"),
+        &format!("{project_name}/{TEMPLATES_DIR}/{BLOG_DIR}/index.{jinja_file}"),
         &html::BLOG_INDEX_TEMPLATE.to_owned(),
     )?;
     make_file(
-        &format!(
-            "{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{BLOG_DIR}{PATH_SEP}test-blog.{jinja_file}"
-        ),
+        &format!("{project_name}/{TEMPLATES_DIR}/{BLOG_DIR}/test-blog.{jinja_file}"),
         &html::BLOG_POST_TEMPLATE.to_owned(),
     )?;
     make_file(
-        &format!("{project_name}{PATH_SEP}{TEMPLATES_DIR}{PATH_SEP}{BLOG_DIR}{PATH_SEP}feed.{jinja_file}"),
+        &format!("{project_name}/{TEMPLATES_DIR}/{BLOG_DIR}/feed.{jinja_file}"),
         &rss::RSS_FEED_TEMPLATE.to_owned(),
     )?;
 
@@ -174,11 +152,10 @@ pub fn init(project: String, owner: String, owner_email: String) -> Result<Confi
     env.add_raw_template(TAILWIND_CONFIG_FILE, tailwind::CONFIG)?;
     let mut tailwind_ctx = Context::new();
     tailwind_ctx.insert("project", &project_name);
-    tailwind_ctx.insert("path_sep", &PATH_SEP);
     tailwind_ctx.insert("output_dir", OUTPUT_DIR);
     let tailwind_tmpl = render_template(&env, TAILWIND_CONFIG_FILE, &tailwind_ctx)?;
     make_file(
-        &format!("{CONFIG_DIR}{PATH_SEP}{TAILWIND_CONFIG_FILE}"),
+        &format!("{CONFIG_DIR}/{TAILWIND_CONFIG_FILE}"),
         &tailwind_tmpl,
     )?;
 
@@ -186,7 +163,6 @@ pub fn init(project: String, owner: String, owner_email: String) -> Result<Confi
     env.add_raw_template(PROC_FILE, proc::PROCFILE)?;
     let mut procfile_ctx = Context::new();
     procfile_ctx.insert("project", &project_name);
-    procfile_ctx.insert("path_sep", &PATH_SEP);
     procfile_ctx.insert("output_dir", OUTPUT_DIR);
     procfile_ctx.insert("config_dir", CONFIG_DIR);
     procfile_ctx.insert("tailwind_config_file", TAILWIND_CONFIG_FILE);
@@ -197,7 +173,6 @@ pub fn init(project: String, owner: String, owner_email: String) -> Result<Confi
     env.add_raw_template(PROC_FILE_DEV, proc::PROCFILE_DEV)?;
     let mut procfile_dev_ctx = Context::new();
     procfile_dev_ctx.insert("project", &project_name);
-    procfile_dev_ctx.insert("path_sep", &PATH_SEP);
     procfile_dev_ctx.insert("output_dir", OUTPUT_DIR);
     procfile_dev_ctx.insert("config_dir", CONFIG_DIR);
     procfile_dev_ctx.insert("tailwind_config_file", TAILWIND_CONFIG_FILE);
@@ -223,8 +198,10 @@ pub fn build() -> Result<()> {
     event!(target: "shazam", Level::INFO, "Project: `{project_name}` => building ...");
 
     // Template environment
-    let mut env = init_env(&current_dir, &project_name)?;
+    let env = init_env(&current_dir, &project_name)?;
 
+    // Stores a MD5 hash of the template files. This is
+    // used to check for changes to temlpate files.
     let mut template_hashes: HashMap<String, String> =
         match fs::read_to_string(TEMPLATE_HASHES_FILENAME) {
             Ok(s) => serde_json::from_str(&s)?,
@@ -232,32 +209,19 @@ pub fn build() -> Result<()> {
         };
 
     // Project index template file
-    let index_tmpl_name = format!("{project_name}{PATH_SEP}index.{jinja_file}");
-
-    env.add_template_file(&index_tmpl_name, None)?;
     let mut index_ctx = Context::new();
     index_ctx.insert("config", &config);
     index_ctx.insert("posts", &posts);
 
-    let tmpl = render_template(&env, &index_tmpl_name, &index_ctx)?;
+    let index_template_name = format!("index.{jinja_file}");
+    let index_template = render_template(&env, &index_template_name, &index_ctx)?;
 
-    // TODO: refactor to function
-    template_hashes
-        .entry(index_tmpl_name.to_owned())
-        .or_insert_with(|| "".to_owned());
-
-    let current_hash = template_hashes[&index_tmpl_name].to_owned();
-    let this_hash = template_hasher(&tmpl);
-
-    if current_hash != this_hash {
-        event!(target: "shazam", Level::INFO, "File: `{index_tmpl_name}` has changed, rebuilding...");
-        template_hashes.insert(index_tmpl_name, this_hash);
-        make_file(
-            &format!("{project_name}{PATH_SEP}{output_dir}{PATH_SEP}{HTML_INDEX_FILE}"),
-            &tmpl,
-        )?;
-    }
-    //
+    template_builder(
+        &mut template_hashes,
+        &index_template_name,
+        &index_template,
+        &format!("{project_name}/{output_dir}/{HTML_INDEX_FILE}"),
+    )?;
 
     for dir in content_dirs {
         let mut dir_posts: Vec<Post> = match posts.by_content.get(&dir) {
@@ -277,7 +241,7 @@ pub fn build() -> Result<()> {
         clean_posts.insert("posts".to_owned(), dir_posts.to_owned());
 
         make_file(
-            &format!("{project_name}{PATH_SEP}{data_dir}{PATH_SEP}{dir}.toml"),
+            &format!("{project_name}/{data_dir}/{dir}.toml"),
             &toml::to_string(&clean_posts)?,
         )?;
 
@@ -285,28 +249,15 @@ pub fn build() -> Result<()> {
         dir_ctx.insert("config", &config);
         dir_ctx.insert("posts", &posts);
 
-        let dir_tmpl_name = format!("{dir}{PATH_SEP}index.{jinja_file}");
-        let dir_tmpl = render_template(&env, &dir_tmpl_name, &dir_ctx)?;
+        let dir_template_name = format!("{dir}/index.{jinja_file}");
+        let dir_template = render_template(&env, &dir_template_name, &dir_ctx)?;
 
-        // TODO: refactor to function
-        template_hashes
-            .entry(dir_tmpl_name.to_owned())
-            .or_insert_with(|| "".to_owned());
-
-        let current_hash = template_hashes[&dir_tmpl_name].to_owned();
-        let this_hash = template_hasher(&dir_tmpl);
-
-        if current_hash != this_hash {
-            event!(target: "shazam", Level::INFO, "File: `{dir_tmpl_name}` has changed, rebuilding...");
-            template_hashes.insert(dir_tmpl_name, this_hash);
-            make_file(
-                &format!(
-                    "{project_name}{PATH_SEP}{OUTPUT_DIR}{PATH_SEP}{dir}{PATH_SEP}{HTML_INDEX_FILE}"
-                ),
-                &dir_tmpl,
-            )?;
-        }
-        //
+        template_builder(
+            &mut template_hashes,
+            &dir_template_name,
+            &dir_template,
+            &format!("{project_name}/{OUTPUT_DIR}/{dir}/{HTML_INDEX_FILE}"),
+        )?;
 
         // Get the rendered body content from posts
         let re = Regex::new(r"^[\s\S]*<body[^>]*>([\s\S]*)</body>[\s\S]*$")?;
@@ -319,7 +270,7 @@ pub fn build() -> Result<()> {
             post_ctx.insert("config", &config);
             post_ctx.insert("post", &post);
             post_ctx.insert("posts", &posts);
-            let tmpl = render_template(&env, &format!("{dir}{PATH_SEP}{file_name}"), &post_ctx)?;
+            let tmpl = render_template(&env, &format!("{dir}/{file_name}"), &post_ctx)?;
 
             let content = match re.captures(&tmpl) {
                 Some(s) => s[1].to_string(),
@@ -335,20 +286,15 @@ pub fn build() -> Result<()> {
             let (file_type, file_path) = match post.file_type {
                 FileType::Html => (
                     HTML_INDEX_FILE,
-                    format!(
-                        "{project_name}{PATH_SEP}{output_dir}{PATH_SEP}{dir}{PATH_SEP}{post_title}"
-                    ),
+                    format!("{project_name}/{output_dir}/{dir}/{post_title}"),
                 ),
-                FileType::Xml => (
-                    RSS_FEED_FILE,
-                    format!("{project_name}{PATH_SEP}{output_dir}{PATH_SEP}{dir}"),
-                ),
+                FileType::Xml => (RSS_FEED_FILE, format!("{project_name}/{output_dir}/{dir}")),
                 _ => bail!("unsupported file type"),
             };
             // Only make directories for HTML files.
             if post.file_type == FileType::Html {
                 make_dirs(
-                    &format!("{project_name}{PATH_SEP}{output_dir}{PATH_SEP}{dir}"),
+                    &format!("{project_name}/{output_dir}/{dir}"),
                     vec![post_title.to_owned()],
                 )?;
             }
@@ -357,21 +303,16 @@ pub fn build() -> Result<()> {
             post_ctx.insert("config", &config);
             post_ctx.insert("post", &post);
             post_ctx.insert("posts", &posts);
-            let template_name = format!("{dir}{PATH_SEP}{file_name}");
-            let post_tmpl = render_template(&env, &template_name, &post_ctx)?;
 
-            template_hashes
-                .entry(template_name.to_owned())
-                .or_insert_with(|| "".to_owned());
+            let post_template_name = format!("{dir}/{file_name}");
+            let post_template = render_template(&env, &post_template_name, &post_ctx)?;
 
-            let current_hash = template_hashes[&template_name].to_owned();
-            let this_hash = template_hasher(&post_tmpl);
-
-            if current_hash != this_hash {
-                event!(target: "shazam", Level::INFO, "File: `{template_name}` has changed, rebuilding...");
-                template_hashes.insert(template_name, this_hash);
-                make_file(&format!("{file_path}{PATH_SEP}{file_type}"), &post_tmpl)?;
-            }
+            template_builder(
+                &mut template_hashes,
+                &post_template_name,
+                &post_template,
+                &format!("{file_path}/{file_type}"),
+            )?;
         }
     }
 
@@ -383,8 +324,8 @@ pub fn build() -> Result<()> {
 
     // Move assets
     copy_recursively(
-        format!("{project_name}{PATH_SEP}{ASSETS_DIR}"),
-        format!("{project_name}{PATH_SEP}{OUTPUT_DIR}"),
+        format!("{project_name}/{ASSETS_DIR}"),
+        format!("{project_name}/{OUTPUT_DIR}"),
     )?;
 
     event!(target: "shazam", Level::INFO, "Project: `{project_name}` => build complete");

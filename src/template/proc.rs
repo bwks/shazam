@@ -1,8 +1,8 @@
-pub const PROCFILE: &str = r#"web: .{{ path_sep }}shazam build && .{{ path_sep }}shazam serve
-css: .{{ path_sep }}tailwindcss -c {{ config_dir }}{{ path_sep }}{{ tailwind_config_file }} -i {{ project }}{{ path_sep }}assets{{ path_sep }}css{{ path_sep }}input.css -o {{ project }}{{ path_sep }}{{ output_dir }}{{ path_sep }}css{{ path_sep }}app.css --watch
-build: .{{ path_sep }}reflex -r "\.jinja$" .{{ path_sep }}overmind restart web
+pub const PROCFILE: &str = r#"web: ./shazam build && ./shazam serve
+css: ./tailwindcss -c {{ config_dir }}/{{ tailwind_config_file }} -i {{ project }}/assets/css/input.css -o {{ project }}/{{ output_dir }}/css/app.css --watch
+build: ./reflex -r "\.jinja$" ./overmind restart web
 "#;
 pub const PROCFILE_DEV: &str = r#"web: cargo run -- build && cargo run -- serve
-css: .{{ path_sep }}tailwindcss -c {{ config_dir }}{{ path_sep }}{{ tailwind_config_file }} -i {{ project }}{{ path_sep }}assets{{ path_sep }}css{{ path_sep }}input.css -o {{ project }}{{ path_sep }}{{ output_dir }}{{ path_sep }}css{{ path_sep }}app.css --watch
-build: .{{ path_sep }}reflex -r "\.jinja$" .{{ path_sep }}overmind restart web
+css: ./tailwindcss -c {{ config_dir }}/{{ tailwind_config_file }} -i {{ project }}/assets/css/input.css -o {{ project }}/{{ output_dir }}/css/app.css --watch
+build: ./reflex -r "\.jinja$" ./overmind restart web
 "#;

@@ -2,7 +2,7 @@ use anyhow::Result;
 use axum::body::Body;
 use axum::http::Request;
 use axum::{http::StatusCode, response::IntoResponse, routing::get_service, Router};
-use std::path::MAIN_SEPARATOR as PATH_SEP;
+
 use std::{io, net::SocketAddr};
 use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing::{event, Level, Span};
@@ -18,7 +18,7 @@ pub async fn serve(ipv4_address: String, port: u16) -> Result<()> {
     let app = Router::new().route(
         "/*path",
         get_service(ServeDir::new(format!(
-            "{project_name}{PATH_SEP}{output_dir}{PATH_SEP}"
+            "{project_name}/{output_dir}/"
         )))
         .handle_error(handle_error)
         .layer(
