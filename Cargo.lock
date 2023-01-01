@@ -1092,7 +1092,7 @@ dependencies = [
 
 [[package]]
 name = "shazam"
-version = "0.1.21-a"
+version = "0.1.21-b"
 dependencies = [
  "anyhow",
  "axum",

@@ -42,6 +42,6 @@ jobs:
           #     - $target - Target triple.
           #     - $tag    - Tag of this release.
           # When multiple binary names are specified, default archive name or $bin variable cannot be used.
-          archive: $bin-$tag-$target
+          archive: $bin-$tag-${{ matrix.target }}
           # (required) GitHub token for uploading assets to GitHub Releases.
           token: ${{ secrets.GITHUB_TOKEN }}
