@@ -44,6 +44,6 @@ jobs:
           #     - $tag    - Tag of this release.
           # When multiple binary names are specified, default archive name or $bin variable cannot be used.
           target: ${{ matrix.target }}
-          archive: $bin-$tag-${{ matrix.target }}
+          archive: $bin-${{ matrix.target }}
           # (required) GitHub token for uploading assets to GitHub Releases.
           token: ${{ secrets.GITHUB_TOKEN }}
