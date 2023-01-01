@@ -1,0 +1,32 @@
+FROM bwks/shazam:v0.1.20
+
+ARG APP_NAME
+ARG APP_USER
+ARG APP_USER_ID
+ARG APP_GROUP_ID
+ARG HOME_DIR
+ENV APP_NAME ${APP_NAME}
+ENV APP_USER ${APP_USER}
+ENV APP_USER_ID ${APP_USER_ID}
+ENV APP_GROUP_ID ${APP_GROUP_ID}
+ENV HOME_DIR ${HOME_DIR}
+
+# Create app user and group
+RUN addgroup -S ${APP_USER} -g ${APP_GROUP_ID}  && adduser -u ${APP_USER_ID} -S ${APP_USER} -G ${APP_USER} -s /bin/ash
+
+COPY /opt/shazam ${HOME_DIR}/shazam
+COPY /opt/tailwindcss ${HOME_DIR}/tailwindcss
+COPY /opt/reflex ${HOME_DIR}/reflex
+COPY /opt/overmind ${HOME_DIR}/overmind
+
+# Set directory ownership
+RUN chown -R ${APP_USER_ID}:${APP_GROUP_ID} ${HOME_DIR}
+
+WORKDIR ${HOME_DIR}
+
+USER ${APP_USER}
+
+RUN ./shazam init ${APP_NAME}
+
+EXPOSE 3000
+CMD ["./overmind", "s", "-f", "Procfile"]
