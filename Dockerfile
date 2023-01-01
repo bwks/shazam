@@ -1,4 +1,4 @@
-FROM rust:1.64-alpine as builder
+FROM alpine:3.16.2 as builder
 
 WORKDIR /opt/
 
