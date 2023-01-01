@@ -47,8 +47,9 @@ jobs:
           # (required) GitHub token for uploading assets to GitHub Releases.
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  push_to_registry:
+  push-to-registry:
     name: Push Docker image to Docker Hub
+    needs: upload-assets
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
