@@ -71,7 +71,15 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
-      
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Get tag"
+        id: get-tag
+        shell: bash
+        run: |
+          echo PKG_VERSION=$(awk -F ' = ' '$1 ~ /version/ { gsub(/["]/, "", $2); printf("%s",$2) }' Cargo.toml) >> $GITHUB_OUTPUT
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
@@ -89,5 +97,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: v${{ steps.get-tag.outputs.PKG_VERSION }}
           labels: ${{ steps.meta.outputs.labels }}
