@@ -51,6 +51,7 @@ jobs:
           bin: shazam
           target: ${{ matrix.target }}
           archive: $bin-${{ matrix.target }}
+          ref: refs/tags/v${{ steps.get-tag.outputs.PKG_VERSION }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
   push-to-registry:
