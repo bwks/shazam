@@ -20,5 +20,6 @@ jobs:
         shell: bash
         run: |
           git tag v${{ steps.get-tag.outputs.PKG_VERSION }} && git push --tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+        with:
+          token: ${{ secrets.PERSONAL_TOKEN }}
+
