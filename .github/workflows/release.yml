@@ -21,6 +21,7 @@ jobs:
           # (optional) Path to changelog.
           # changelog: CHANGELOG.md
           branch: main
+          ref: refs/heads/main
           token: ${{ secrets.GITHUB_TOKEN }}
 
   upload-assets:
