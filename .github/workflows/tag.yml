@@ -10,17 +10,14 @@ jobs:
     name: "Create tag"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
       - name: "Get tag"
         id: get-tag
         shell: bash
         run: |
           echo PKG_VERSION=$(awk -F ' = ' '$1 ~ /version/ { gsub(/["]/, "", $2); printf("%s",$2) }' Cargo.toml) >> $GITHUB_OUTPUT
       - name: "Set Tag"
-        env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         shell: bash
         run: |
           git tag v${{ steps.get-tag.outputs.PKG_VERSION }} && git push --tags
