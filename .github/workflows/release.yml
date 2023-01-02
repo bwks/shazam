@@ -4,13 +4,15 @@ permissions:
   contents: write
 
 on:
-  push:
-    tags:
-      - v[0-9]+.*
+  workflow_run:
+    workflows: [Tag]
+    types:
+      - completed
 
 jobs:
   create-release:
     name: Create release
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -22,6 +24,7 @@ jobs:
 
   upload-assets:
     name: Upload assets to Github releases
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     strategy:
       matrix:
         include:
@@ -41,6 +44,7 @@ jobs:
 
   push-to-registry:
     name: Push Docker image to Docker Hub
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs: upload-assets
     runs-on: ubuntu-latest
     steps:

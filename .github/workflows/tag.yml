@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: "Get tag"
         id: get-tag
         shell: bash
@@ -20,6 +22,4 @@ jobs:
         shell: bash
         run: |
           git tag v${{ steps.get-tag.outputs.PKG_VERSION }} && git push --tags
-        with:
-          token: ${{ secrets.PERSONAL_TOKEN }}
 
