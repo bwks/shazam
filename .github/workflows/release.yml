@@ -7,11 +7,12 @@ on:
   push:
     tags:
       - v[0-9]+.*
+    branches:
+      - main
 
 jobs:
   create-release:
     name: Create release
-    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -23,7 +24,6 @@ jobs:
 
   upload-assets:
     name: Upload assets to Github releases
-    if: ${{ github.ref == 'refs/heads/main' }}
     strategy:
       matrix:
         include:
@@ -43,7 +43,6 @@ jobs:
 
   push-to-registry:
     name: Push Docker image to Docker Hub
-    if: ${{ github.ref == 'refs/heads/main' }}
     needs: upload-assets
     runs-on: ubuntu-latest
     steps:
