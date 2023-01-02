@@ -46,13 +46,21 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Get tag"
+        id: get-tag
+        shell: bash
+        run: |
+          echo PKG_VERSION=$(awk -F ' = ' '$1 ~ /version/ { gsub(/["]/, "", $2); printf("%s",$2) }' Cargo.toml) >> $GITHUB_OUTPUT
+
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           bin: shazam
           target: ${{ matrix.target }}
           archive: $bin-${{ matrix.target }}
           ref: refs/tags/v${{ steps.get-tag.outputs.PKG_VERSION }}
-          token: ${{ secrets.GITHUB_TOKEN }}
 
   push-to-registry:
     name: Push Docker image to Docker Hub
