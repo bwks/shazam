@@ -97,7 +97,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: 
-            - latest
-            - bwks/shazam:v${{ steps.get-tag.outputs.PKG_VERSION }}
+          tags: bwks/shazam:latest,bwks/shazam:v${{ steps.get-tag.outputs.PKG_VERSION }}
           labels: ${{ steps.meta.outputs.labels }}
