@@ -21,7 +21,7 @@ jobs:
           # (optional) Path to changelog.
           # changelog: CHANGELOG.md
           branch: main
-          ref: refs/heads/main
+          ref: refs/tags/v${{ steps.get-tag.outputs.PKG_VERSION }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
   upload-assets:
