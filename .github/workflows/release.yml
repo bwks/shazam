@@ -12,6 +12,7 @@ on:
 jobs:
   get-tag:
     name: "Get Tag From Package Version"
+    runs-on: "ubuntu-latest"
     outputs:
       pkg_version: ${{ steps.pkg-version.outputs.PKG_VERSION }} 
     steps:
