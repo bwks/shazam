@@ -1,101 +1,88 @@
-name: Release
+name: "Release"
 
 permissions:
-  contents: write
+  contents: "write"
 
 on:
   workflow_run:
-    workflows: [Tag]
+    workflows: ["Tag"]
     types:
-      - completed
+      - "completed"
 
 jobs:
-  create-release:
-    name: Create release
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    runs-on: ubuntu-latest
+  get-tag:
+    name: "Get Tag From Package Version"
+    outputs:
+      pkg_version: ${{ steps.pkg-version.outputs.PKG_VERSION }} 
     steps:
-      - uses: actions/checkout@v3
+      - uses: "actions/checkout@v3"
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Get tag"
-        id: get-tag
-        shell: bash
+        id: "pkg-version"
+        shell: "bash"
         run: |
           echo PKG_VERSION=$(awk -F ' = ' '$1 ~ /version/ { gsub(/["]/, "", $2); printf("%s",$2) }' Cargo.toml) >> $GITHUB_OUTPUT
 
-      - uses: taiki-e/create-gh-release-action@v1
+
+  create-release:
+    name: "Create release"
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v3"
+      - uses: "taiki-e/create-gh-release-action@v1"
         with:
           # (optional) Path to changelog.
           # changelog: CHANGELOG.md
-          branch: main
-          ref: refs/tags/v${{ steps.get-tag.outputs.PKG_VERSION }}
+          branch: "main"
+          ref: refs/tags/v${{ needs.pkg-version.outputs.pkg_version }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
   upload-assets:
-    name: Upload assets to Github releases
+    name: "Upload assets to Github releases"
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     strategy:
       matrix:
         include:
-          - target: x86_64-unknown-linux-gnu
-            os: ubuntu-latest
-          - target: x86_64-unknown-linux-musl
-            os: ubuntu-latest
+          - target: "x86_64-unknown-linux-gnu"
+            os: "ubuntu-latest"
+          - target: "x86_64-unknown-linux-musl"
+            os: "ubuntu-latest"
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: "actions/checkout@v3"
+      - uses: "taiki-e/upload-rust-binary-action@v1"
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: "Get tag"
-        id: get-tag
-        shell: bash
-        run: |
-          echo PKG_VERSION=$(awk -F ' = ' '$1 ~ /version/ { gsub(/["]/, "", $2); printf("%s",$2) }' Cargo.toml) >> $GITHUB_OUTPUT
-
-      - uses: taiki-e/upload-rust-binary-action@v1
-        with:
-          bin: shazam
+          bin: "shazam"
           target: ${{ matrix.target }}
           archive: $bin-${{ matrix.target }}
-          ref: refs/tags/v${{ steps.get-tag.outputs.PKG_VERSION }}
+          ref: refs/tags/v${{ needs.pkg-version.outputs.pkg_version }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
   push-to-registry:
-    name: Push Docker image to Docker Hub
+    name: "Push Docker image to Docker Hub"
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    needs: upload-assets
-    runs-on: ubuntu-latest
+    needs: "upload-assets"
+    runs-on: "ubuntu-latest"
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: "Get tag"
-        id: get-tag
-        shell: bash
-        run: |
-          echo PKG_VERSION=$(awk -F ' = ' '$1 ~ /version/ { gsub(/["]/, "", $2); printf("%s",$2) }' Cargo.toml) >> $GITHUB_OUTPUT
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+      - name: "Log in to Docker Hub"
+        uses: "docker/login-action@v2"
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v4
+      - name: "Extract metadata (tags, labels) for Docker"
+        id: "meta"
+        uses: "docker/metadata-action@v4"
         with:
-          images: bwks/shazam
+          images: "bwks/shazam"
       
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v3
+      - name: "Build and push Docker image"
+        uses: "docker/build-push-action@v3"
         with:
           context: .
           push: true
-          tags: bwks/shazam:latest,bwks/shazam:v${{ steps.get-tag.outputs.PKG_VERSION }}
+          tags: bwks/shazam:latest,bwks/shazam:v${{ needs.pkg-version.outputs.pkg_version }}
           labels: ${{ steps.meta.outputs.labels }}
