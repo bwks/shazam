@@ -8,12 +8,15 @@ jobs:
     name: "Cargo check"
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v3"
+      - name: "Check out the repo"
+        uses: actions/checkout@v3
+
       - uses: "actions-rs/toolchain@v1"
         with:
           profile: "minimal"
           toolchain: "stable"
           override: true
+
       - uses: "actions-rs/cargo@v1"
         with:
           command: "check"
@@ -22,12 +25,15 @@ jobs:
     name: "Cargo test"
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v3"
+      - name: "Check out the repo"
+        uses: actions/checkout@v3
+
       - uses: "actions-rs/toolchain@v1"
         with:
           profile: "minimal"
           toolchain: "stable"
           override: true
+
       - uses: "actions-rs/cargo@v1"
         with:
           command: "test"
@@ -36,13 +42,17 @@ jobs:
     name: "Cargo format"
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v3"
+      - name: "Check out the repo"
+        uses: actions/checkout@v3
+
       - uses: "actions-rs/toolchain@v1"
         with:
           profile: "minimal"
           toolchain: "stable"
           override: true
+          
       - run: "rustup component add rustfmt"
+
       - uses: "actions-rs/cargo@v1"
         with:
           command: "fmt"
@@ -52,13 +62,17 @@ jobs:
     name: "Cargo clippy"
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v3"
+      - name: "Check out the repo"
+        uses: actions/checkout@v3
+
       - uses: "actions-rs/toolchain@v1"
         with:
           profile: "minimal"
           toolchain: "stable"
           override: true
+
       - run: "rustup component add clippy"
+
       - uses: "actions-rs/cargo@v1"
         with:
           command: "clippy"
