@@ -1,6 +1,6 @@
 [package]
 name = "shazam"
-version = "0.1.60"
+version = "0.1.61"
 edition = "2021"
 authors = ["Bradley Searle"]
 license = "MIT"
