@@ -38,7 +38,7 @@ jobs:
           # (optional) Path to changelog.
           # changelog: CHANGELOG.md
           branch: "main"
-          ref: refs/tags/v${{ needs.pkg-version.outputs.pkg_version }}
+          ref: refs/tags/v${{ needs.get-tag.outputs.pkg_version }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
   upload-assets:
@@ -59,7 +59,7 @@ jobs:
           bin: "shazam"
           target: ${{ matrix.target }}
           archive: $bin-${{ matrix.target }}
-          ref: refs/tags/v${{ needs.pkg-version.outputs.pkg_version }}
+          ref: refs/tags/v${{ needs.get-tag.outputs.pkg_version }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
   push-to-registry:
@@ -85,5 +85,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: bwks/shazam:latest,bwks/shazam:v${{ needs.pkg-version.outputs.pkg_version }}
+          tags: bwks/shazam:latest,bwks/shazam:v${{ needs.get-tag.outputs.pkg_version }}
           labels: ${{ steps.meta.outputs.labels }}
