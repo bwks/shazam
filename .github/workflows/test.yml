@@ -5,7 +5,7 @@ on:
 
 jobs:
   check:
-    name: "cargo check"
+    name: "Cargo check"
     runs-on: "ubuntu-latest"
     steps:
       - uses: "actions/checkout@v3"
@@ -19,7 +19,7 @@ jobs:
           command: "check"
 
   test:
-    name: "cargo test"
+    name: "Cargo test"
     runs-on: "ubuntu-latest"
     steps:
       - uses: "actions/checkout@v3"
@@ -33,7 +33,7 @@ jobs:
           command: "test"
 
   fmt:
-    name: "cargo format"
+    name: "Cargo format"
     runs-on: "ubuntu-latest"
     steps:
       - uses: "actions/checkout@v3"
@@ -49,7 +49,7 @@ jobs:
           args: "--all -- --check"
 
   clippy:
-    name: "cargo clippy"
+    name: "Cargo clippy"
     runs-on: "ubuntu-latest"
     steps:
       - uses: "actions/checkout@v3"
