@@ -1,21 +1,8 @@
 # Shazam
-Shazam is a static site generator written in Rust with 
-a minimal set of features.
+Shazam is a static site generator for masochists
 
 ## License
 [MIT](LICENSE).
-
-## TODO
-* ~~Initialize Project~~
-* ~~Load Config~~
-* ~~Build site~~
-* ~~Dev HTTP server~~
-* ~~New post generator~~
-* ~~Rebuild site on file change~~
-* ~~Highlight JS~~
-* ~~GitHub actions~~
-* ~~Dockerize~~
-* Hot reload dev server on file change
 
 ## Features
 * `TailwindCSS` - CSS framework
