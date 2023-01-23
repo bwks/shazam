@@ -5,14 +5,67 @@ Shazam is a static site generator for masochists
 [MIT](LICENSE).
 
 ## Features
-* `TailwindCSS` - CSS framework
-* `HighlightJS` - Code block syntax highlighting
-* `Mini Jinja` - Post templates
-* `Development Server` - Built with Axum
-* `Overmind` - Process monitoring
-* `Refelx` - Rebuild site in file change
+Shazam's goal is to give you the tools to create a static website without getting in your way.
+
+* Templating engine - [https://github.com/Keats/tera](tera)
+* Development server - [https://github.com/tokio-rs/axum](axum)
+
+A newly initialize project uses `tailwindcss` for stylying and `highlightjs` for code blocks.
+You can how ever you any CSS and/or code highlighting frameworks you like by importing them.
+
+At them moment Shazam also uses a couple of other project until the features are implemented 
+directly into Shazam.
+
+* Process management - [Overmind](https://github.com/DarthSim/overmind)
+* Monitor file changes - [Reflex](https://github.com/cespare/reflex)
+
+> Note: At the moment, Shazam is only tested on Linux and Docker.
+> It will probably work on MacOS.
+> Native Windows supported is targeted in a future release.
 
 ## Getting Started
+
+### Docker
+The quickest way to get started is with Docker and the [Shazam Starter Template](https://github.com/bwks/shazam-starter). 
+
+
+> It is assumed that you already have Docker with Compose already installed.
+> This template was tested against Docker CE - 20.10.21
+
+#### Clone the starter template
+```
+git clone --depth 1 git@github.com:bwks/shazam-starter.git <project-name>
+```
+
+#### Move to project directory
+```
+cd <project-name>
+```
+
+#### Remove Git History
+```
+rm -rf .git
+```
+
+#### Update project variables in `bin/dev` file
+```
+APP_NAME="<UPDATE>";
+APP_OWNER="<UPDATE>";
+APP_OWNER_EMAIL="<UPDATE>";
+```
+
+#### Initialize the project
+```
+bin/dev init
+```
+
+#### Start the dev server
+```
+bin/dev up
+```
+
+### Native install
+
 * Install Overmind
 * Download tailwindcss binary
 * Download reflex binary
@@ -91,43 +144,3 @@ Now you can access the site via http from your browser.
 ./overmind s -f Procfile.dev
 ```
 
-## Docker
-Build the container using `docker compose`
-```
-docker compose \
-  -f docker/docker-compose.yaml \
-  --env-file docker/.env \
-  build \
-    --build-arg APP_USER=$USER \
-    --build-arg APP_NAME=test \
-    --build-arg APP_USER_ID=$UID \
-    --build-arg APP_GROUP_ID=$GID \
-    --build-arg HOME_DIR=$HOME
-```
-
-If you have not yet initialized a project, then run the following to 
-create the project files/folders in your current directory.
-```
-export APP_NAME="test" \
-  && docker container run -itd --name=shazam-tmp shazam ash \
-  && docker container cp shazam-tmp:$HOME/$APP_NAME $APP_NAME \
-  && docker container cp shazam-tmp:$HOME/config config \
-  && docker container kill shazam-tmp \
-  && docker container rm shazam-tmp
-```
-
-Bring the container up
-```
-docker compose \
-  -f docker-compose.yaml \
-  --env-file .env \
-  up
-```
-
-Shut the container down when you are done.
-```
-docker compose \
-  -f docker-compose.yaml \
-  --env-file .env \
-  down
-```
