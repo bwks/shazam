@@ -7,11 +7,11 @@ Shazam is a static site generator for masochists
 ## Features
 Shazam's goal is to give you the tools to create a static website without getting in your way.
 
-* Templating engine - [https://github.com/Keats/tera](tera)
-* Development server - [https://github.com/tokio-rs/axum](axum)
+* Templating engine - [Tera](https://github.com/Keats/tera)
+* Development server - [Axum](https://github.com/tokio-rs/axum)
 
 A newly initialize project uses `tailwindcss` for stylying and `highlightjs` for code blocks.
-You can how ever you any CSS and/or code highlighting frameworks you like by importing them.
+You can however, use any CSS and/or code highlighting frameworks you like by importing them.
 
 At them moment Shazam also uses a couple of other project until the features are implemented 
 directly into Shazam.
@@ -66,10 +66,45 @@ bin/dev up
 
 ### Native install
 
-* Install Overmind
-* Download tailwindcss binary
-* Download reflex binary
-* Download shazam binary
+#### Overmind
+Download Overmind which is used to manage `tailwind`, `reflex` and `shazam`.
+
+```
+curl -sLO https://github.com/DarthSim/overmind/releases/latest/download/overmind-v2.3.0-linux-amd64.gz \
+  && gunzip overmind-v2.3.0-linux-amd64.gz \
+  && chmod +x overmind-v2.3.0-linux-amd64 \
+  && mv overmind-v2.3.0-linux-amd64 overmind
+```
+
+#### Tailwind CSS
+Download the Tailwind CSS CLI to manage building the sites CSS files.
+
+```
+curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64 \
+  && chmod +x tailwindcss-linux-x64 \
+  && mv tailwindcss-linux-x64 tailwindcss
+```
+
+#### Reflex
+Download Reflex which watches for template file changes and executes a rebuild on change.
+
+```
+curl -sLO https://github.com/cespare/reflex/releases/latest/download/reflex_linux_amd64.tar.gz \
+  && tar -xvf reflex_linux_amd64.tar.gz \
+  && chmod +x reflex_linux_amd64/reflex \
+  && mv reflex_linux_amd64/reflex reflex
+```
+
+
+#### Shazam
+Download the Shazam binary to manage the static site.
+
+```
+curl -sLO https://github.com/bwks/shazam/releases/latest/download/ shazam-x86_64-unknown-linux-gnu.tar.gz  \
+  && tar -xvf  shazam-x86_64-unknown-linux-gnu.tar.gz  \
+  && chmod +x shazam
+```
+
 
 ### Initialize Project
 Use the `shazam init <project-name>` command to initialize a project.
