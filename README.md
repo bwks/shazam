@@ -1,146 +1,138 @@
 # Shazam
-Shazam is a static site generator written in Rust with 
-a minimal set of features.
+Shazam is a static site generator for masochists
 
 ## License
 [MIT](LICENSE).
 
-## TODO
-* ~~Initialize Project~~
-* ~~Load Config~~
-* ~~Build site~~
-* ~~Dev HTTP server~~
-* ~~New post generator~~
-* ~~Rebuild site on file change~~
-* ~~Highlight JS~~
-* ~~GitHub actions~~
-* ~~Dockerize~~
-* Hot reload dev server on file change
-
 ## Features
-* `TailwindCSS` - CSS framework
-* `HighlightJS` - Code block syntax highlighting
-* `Mini Jinja` - Post templates
-* `Development Server` - Built with Axum
-* `Overmind` - Process monitoring
-* `Refelx` - Rebuild site in file change
+Shazam's goal is to give you the tools to create a static website without getting in your way.
+
+* Templating engine - [Tera](https://github.com/Keats/tera)
+* Development server - [Axum](https://github.com/tokio-rs/axum)
+
+A newly initialize project uses `tailwindcss` for stylying and `highlightjs` for code blocks.
+You can however, use any CSS and/or code highlighting frameworks you like by importing them.
+
+At them moment Shazam also uses a couple of other project until the features are implemented 
+directly into Shazam.
+
+* Process management - [Overmind](https://github.com/DarthSim/overmind)
+* Monitor file changes - [Reflex](https://github.com/cespare/reflex)
+
+> Note: At the moment, Shazam is only tested on Linux and Docker.
+> It will probably work on MacOS.
+> Native Windows supported is targeted in a future release.
 
 ## Getting Started
-* Install Overmind
-* Download tailwindcss binary
-* Download reflex binary
-* Download shazam binary
+
+### Docker
+The quickest way to get started is with Docker and the [Shazam Starter Template](https://github.com/bwks/shazam-starter). 
+
+
+> It is assumed that you already have Docker with Compose already installed.
+> This template was tested against Docker CE - 20.10.21
+
+#### Clone the starter template
+```
+git clone --depth 1 git@github.com:bwks/shazam-starter.git <project-name>
+```
+
+#### Move to project directory
+```
+cd <project-name>
+```
+
+#### Remove Git History
+```
+rm -rf .git
+```
+
+#### Update project variables in `bin/dev` file
+```
+APP_NAME="<UPDATE>";
+APP_OWNER="<UPDATE>";
+APP_OWNER_EMAIL="<UPDATE>";
+```
+
+#### Initialize the project
+```
+bin/dev init
+```
+
+#### Start the dev server
+```
+bin/dev up
+```
+
+### Native install
+The native install requires downloading the variout binaries.
+
+#### Overmind
+Download Overmind which is used to manage `tailwind`, `reflex` and `shazam`.
+
+```
+curl -sLO https://github.com/DarthSim/overmind/releases/latest/download/overmind-v2.3.0-linux-amd64.gz \
+  && gunzip overmind-v2.3.0-linux-amd64.gz \
+  && chmod +x overmind-v2.3.0-linux-amd64 \
+  && mv overmind-v2.3.0-linux-amd64 overmind
+```
+
+#### Tailwind CSS
+Download the Tailwind CSS CLI to manage building the sites CSS files.
+
+```
+curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64 \
+  && chmod +x tailwindcss-linux-x64 \
+  && mv tailwindcss-linux-x64 tailwindcss
+```
+
+#### Reflex
+Download Reflex which watches for template file changes and executes a rebuild on change.
+
+```
+curl -sLO https://github.com/cespare/reflex/releases/latest/download/reflex_linux_amd64.tar.gz \
+  && tar -xvf reflex_linux_amd64.tar.gz \
+  && chmod +x reflex_linux_amd64/reflex \
+  && mv reflex_linux_amd64/reflex reflex \ 
+  && rm -rf reflex_linux_amd64*
+```
+
+#### Shazam
+Download the Shazam binary to manage the static site.
+
+```
+curl -sLO https://github.com/bwks/shazam/releases/latest/download/shazam-x86_64-unknown-linux-gnu.tar.gz  \
+  && tar -xvf  shazam-x86_64-unknown-linux-gnu.tar.gz  \
+  && chmod +x shazam \
+  && rm shazam-x86_64-unknown-linux-gnu.tar.gz
+```
 
 ### Initialize Project
-Use the `shazam init <project-name>` command to initialize a project.
-```
-./shazam init test
-```
+Use the `shazam init` command to initialize a project.
 
-This will build a project named `test` with the following structure.
 ```
-test
-├── _site
-│   ├── blog
-│   │   ├── index.html
-│   │   └── test-blog
-│   │       └── index.html
-│   ├── css
-│   ├── error
-│   ├── favicon
-│   ├── font
-│   ├── img
-│   ├── index.html
-│   └── js
-├── assets
-│   ├── css
-│   │   └── input.css
-│   ├── error
-│   ├── favicon
-│   ├── font
-│   ├── img
-│   └── js
-├── blog
-│   └── test-blog.jinja
-├── config
-├── data
-│   └── blog.json
-└── templates
-    ├── includes
-    │   └── footer.jinja
-    └── layouts
-        ├── base.jinja
-        └── blog.jinja
+./shazam init --name test --owner blah --owner-email blah@blah.blah
 ```
 
 ### Dev Server
-Use `overmind` to start the dev server and begin tailwind file watcher.
+Use `overmind` to start the dev server.
 ```
 > ./overmind s
 
 # output
-system | Tmux socket name: overmind-shazam-JKQwwgZxb6JUmMUlSZ9Pp
-system | Tmux session ID: shazam
+system | Tmux socket name: overmind-test-dppG17E7b_AmVHmQ6fzMs
+system | Tmux session ID: test
 system | Listening at ./.overmind.sock
-build  | Started with pid 763529...
-css    | Started with pid 763527...
-web    | Started with pid 763525...
-web    |     Finished dev [unoptimized + debuginfo] target(s) in 0.05s
-web    |      Running `target/debug/shazam build`
-web    | Project: `test` => building ...
-web    | Project: `test` => build complete
-web    |     Finished dev [unoptimized + debuginfo] target(s) in 0.04s
-web    |      Running `target/debug/shazam serve`
-web    | listening on 0.0.0.0:3000
-css    | 
+css    | Started with pid 291519...
+build  | Started with pid 291522...
+web    | Started with pid 291517...
+web    | 2023-01-24T10:07:03.564088Z  INFO shazam: Project: `test` => building ...
+web    | 2023-01-24T10:07:03.567816Z  INFO shazam: Project: `test` => build complete
+web    | 2023-01-24T10:07:03.572529Z  INFO shazam: listening on 0.0.0.0:3000
+css    |
 css    | Rebuilding...
-css    | Done in 160ms.
+css    |
+css    | Done in 182ms.
 ```
 
 Now you can access the site via http from your browser.
-
-### Run the dev server with cargo
-```
-./overmind s -f Procfile.dev
-```
-
-## Docker
-Build the container using `docker compose`
-```
-docker compose \
-  -f docker/docker-compose.yaml \
-  --env-file docker/.env \
-  build \
-    --build-arg APP_USER=$USER \
-    --build-arg APP_NAME=test \
-    --build-arg APP_USER_ID=$UID \
-    --build-arg APP_GROUP_ID=$GID \
-    --build-arg HOME_DIR=$HOME
-```
-
-If you have not yet initialized a project, then run the following to 
-create the project files/folders in your current directory.
-```
-export APP_NAME="test" \
-  && docker container run -itd --name=shazam-tmp shazam ash \
-  && docker container cp shazam-tmp:$HOME/$APP_NAME $APP_NAME \
-  && docker container cp shazam-tmp:$HOME/config config \
-  && docker container kill shazam-tmp \
-  && docker container rm shazam-tmp
-```
-
-Bring the container up
-```
-docker compose \
-  -f docker-compose.yaml \
-  --env-file .env \
-  up
-```
-
-Shut the container down when you are done.
-```
-docker compose \
-  -f docker-compose.yaml \
-  --env-file .env \
-  down
-```
