@@ -65,6 +65,7 @@ bin/dev up
 ```
 
 ### Native install
+The native install requires downloading the variout binaries.
 
 #### Overmind
 Download Overmind which is used to manage `tailwind`, `reflex` and `shazam`.
@@ -92,90 +93,46 @@ Download Reflex which watches for template file changes and executes a rebuild o
 curl -sLO https://github.com/cespare/reflex/releases/latest/download/reflex_linux_amd64.tar.gz \
   && tar -xvf reflex_linux_amd64.tar.gz \
   && chmod +x reflex_linux_amd64/reflex \
-  && mv reflex_linux_amd64/reflex reflex
+  && mv reflex_linux_amd64/reflex reflex \ 
+  && rm -rf reflex_linux_amd64*
 ```
-
 
 #### Shazam
 Download the Shazam binary to manage the static site.
 
 ```
-curl -sLO https://github.com/bwks/shazam/releases/latest/download/ shazam-x86_64-unknown-linux-gnu.tar.gz  \
+curl -sLO https://github.com/bwks/shazam/releases/latest/download/shazam-x86_64-unknown-linux-gnu.tar.gz  \
   && tar -xvf  shazam-x86_64-unknown-linux-gnu.tar.gz  \
-  && chmod +x shazam
+  && chmod +x shazam \
+  && rm shazam-x86_64-unknown-linux-gnu.tar.gz
 ```
-
 
 ### Initialize Project
-Use the `shazam init <project-name>` command to initialize a project.
-```
-./shazam init test
-```
+Use the `shazam init` command to initialize a project.
 
-This will build a project named `test` with the following structure.
 ```
-test
-├── _site
-│   ├── blog
-│   │   ├── index.html
-│   │   └── test-blog
-│   │       └── index.html
-│   ├── css
-│   ├── error
-│   ├── favicon
-│   ├── font
-│   ├── img
-│   ├── index.html
-│   └── js
-├── assets
-│   ├── css
-│   │   └── input.css
-│   ├── error
-│   ├── favicon
-│   ├── font
-│   ├── img
-│   └── js
-├── blog
-│   └── test-blog.jinja
-├── config
-├── data
-│   └── blog.json
-└── templates
-    ├── includes
-    │   └── footer.jinja
-    └── layouts
-        ├── base.jinja
-        └── blog.jinja
+./shazam init --name test --owner blah --owner-email blah@blah.blah
 ```
 
 ### Dev Server
-Use `overmind` to start the dev server and begin tailwind file watcher.
+Use `overmind` to start the dev server.
 ```
 > ./overmind s
 
 # output
-system | Tmux socket name: overmind-shazam-JKQwwgZxb6JUmMUlSZ9Pp
-system | Tmux session ID: shazam
+system | Tmux socket name: overmind-test-dppG17E7b_AmVHmQ6fzMs
+system | Tmux session ID: test
 system | Listening at ./.overmind.sock
-build  | Started with pid 763529...
-css    | Started with pid 763527...
-web    | Started with pid 763525...
-web    |     Finished dev [unoptimized + debuginfo] target(s) in 0.05s
-web    |      Running `target/debug/shazam build`
-web    | Project: `test` => building ...
-web    | Project: `test` => build complete
-web    |     Finished dev [unoptimized + debuginfo] target(s) in 0.04s
-web    |      Running `target/debug/shazam serve`
-web    | listening on 0.0.0.0:3000
-css    | 
+css    | Started with pid 291519...
+build  | Started with pid 291522...
+web    | Started with pid 291517...
+web    | 2023-01-24T10:07:03.564088Z  INFO shazam: Project: `test` => building ...
+web    | 2023-01-24T10:07:03.567816Z  INFO shazam: Project: `test` => build complete
+web    | 2023-01-24T10:07:03.572529Z  INFO shazam: listening on 0.0.0.0:3000
+css    |
 css    | Rebuilding...
-css    | Done in 160ms.
+css    |
+css    | Done in 182ms.
 ```
 
 Now you can access the site via http from your browser.
-
-### Run the dev server with cargo
-```
-./overmind s -f Procfile.dev
-```
-
